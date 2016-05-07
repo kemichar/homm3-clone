@@ -1,0 +1,6 @@
+attack 7
+defense 3
+moveRange 3
+speed 3
+maxHealth 5
+experience 10
