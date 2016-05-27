@@ -17,6 +17,7 @@ public:
 	static void loadMapBlocks();
 	static void loadModels();
 	static vector<MapBlock*> getBlocksWith(string properties);
+	static vector<Creature*> getCreaturesOfLevel(int level);
 
 	static vector<MapBlock*> blockData;
 	static map<string, Creature*> creatureData;

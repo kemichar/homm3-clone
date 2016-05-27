@@ -1,0 +1,10 @@
+level 2
+baseDamageMin 2
+baseDamageMax 3
+attack 6
+defense 3
+speed 4
+maxHealth 10
+experience 10
+plural Archers
+canShoot true

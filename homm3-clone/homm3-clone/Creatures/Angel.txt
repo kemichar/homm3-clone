@@ -1,0 +1,10 @@
+level 7
+baseDamageMin 50
+baseDamageMax 50
+attack 20
+defense 20
+speed 12
+maxHealth 200
+experience 10
+plural Angels
+canFly true

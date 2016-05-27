@@ -3,39 +3,31 @@
 #include <string>
 #include <GL/glut.h>
 #include "Utility.h"
-#include "Creature.h"
 #include "Constants.h"
-#include "CombatResult.h"
 #include "objglm/objglm.h"
+#include "FactionMember.h"
+#include "Hero.h"
 
 using namespace glm;
 
-class MapObject {
+class MapObject : public FactionMember {
 
 public:
-	MapObject(intp _pos, floatp _modelOffset = floatp(0, 0));
-
+	MapObject(intp _pos, int _factionId = 0);
 	~MapObject();
 
-	int creatureCount();
 	void setModel(GLMmodel* _model);
 
 	virtual bool isBlocking();
 	virtual bool isHolding();
-	virtual bool hasCreatures();
-	virtual void interact();
+	virtual void interact() = 0;
 	virtual void draw(float size);
-	virtual void onCombatEnd(CombatResult result);
 
 	intp pos;
-	Creature* creatures[HERO_UNIT_SLOTS];
+	Hero* hero;
+	MOType objectType;
 
 protected:
-	int objectCode;
-	std::string objectName;
 	GLMmodel* model;
-	floatp modelOffset;
-
-private:
 
 };

@@ -47,6 +47,18 @@ void Resources::loadModels() {
 	}
 }
 
+vector<Creature*> Resources::getCreaturesOfLevel(int level) {
+	vector<Creature*> ret;
+
+	for (auto &creature : creatureData) {
+		if (creature.second->level == level) {
+			ret.push_back(creature.second);
+		}
+	}
+
+	return ret;
+}
+
 vector<MapBlock*> Resources::getBlocksWith(string properties) {
 	vector<MapBlock*> ret;
 

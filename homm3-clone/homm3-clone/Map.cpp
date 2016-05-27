@@ -9,6 +9,9 @@
 #include "MOWall.h"
 #include "MOBuilding.h"
 #include "MOCreature.h"
+#include "MOResource.h"
+#include "MOPath.h"
+#include "MOMine.h"
 #include "Utility.h"
 #include "BIT.h"
 #include "Resources.h"
@@ -19,7 +22,7 @@ Map::Map(int _colCount, int _rowCount) : colCount(_colCount), rowCount(_rowCount
 	srand(time(0));
 }
 
-void Map::fillMap() {
+void Map::fillMap() {/*
 	for (int i = 0; i < colCount; i++) {
 		for (int j = 0; j < rowCount; j++) {
 			int random = rand() % 100;
@@ -51,7 +54,7 @@ void Map::fillMap() {
 		}
 	}
 
-	mapObjects[0][0] = new MOEmpty(vec2(0, 0));
+	mapObjects[0][0] = new MOEmpty(vec2(0, 0));*/
 }
 
 void Map::testFillMap(int zones) {
@@ -60,9 +63,15 @@ void Map::testFillMap(int zones) {
 	}
 	dataTree = new BIT(colCount, rowCount);
 
+	for (int i = 0; i < zones; i++) {
+		adjZones[i].clear();
+	}
+
 	memset(zoneId, -1, sizeof zoneId);
-	memset(subzoneId, -1, sizeof subzoneId);
 	memset(blueprint, UNKNOWN, sizeof blueprint);
+	memset(zoneStartingFaction, 0, sizeof zoneStartingFaction);
+	zoneOrigins.clear();
+	zoneRadius.clear();
 	
 	// the outer map borders
 	/* unnecessary
@@ -77,7 +86,6 @@ void Map::testFillMap(int zones) {
 	*/
 
 	// spread out the zone origins
-	zoneOrigins.clear();
 	for (int i = 0; i < zones; i++) {
 		float bestDist = 0;
 		vec2 bestOrigin(0, 0);
@@ -124,20 +132,24 @@ void Map::testFillMap(int zones) {
 	// divide the zones with the found Voronoi boundaries
 	for (int i = 0; i < zones; i++) {
 		for (int j = i + 1; j < zones; j++) {
-			for (int k = 0; k < (int)boundaries[i][j].size(); k++) {
-				intp boundaryTile = boundaries[i][j][k];
+			if (!boundaries[i][j].empty()) {
+				adjZones[i].push_back(j);
+				adjZones[j].push_back(i);
+				for (int k = 0; k < (int)boundaries[i][j].size(); k++) {
+					intp boundaryTile = boundaries[i][j][k];
 
-				// apply the boundary tile
-				blueprint[boundaryTile.x][boundaryTile.y] = WALL;
-				dataTree->update(boundaryTile, 1);
+					// apply the boundary tile
+					blueprint[boundaryTile.x][boundaryTile.y] = WALL;
+					dataTree->update(boundaryTile, 1);
 
-				// "brush"-spread the boundary
-				// TODO don't use this for now (mby Blueprint::WOULD_LOOK_PRETTY_AS_A_WALL)
-				for (int l = 0; l < 4; l++) {
-					intp adjTile = boundaryTile + MGEN_BOUNDARY_BRUSH[l];
-					if (adjTile.x >= 0 && adjTile.y >= 0 && adjTile.x < colCount && adjTile.y < rowCount) {
-						blueprint[adjTile.x][adjTile.y] = WALL;
-						dataTree->update(adjTile, 1);
+					// "brush"-spread the boundary
+					// TODO don't use this for now (mby Blueprint::WOULD_LOOK_PRETTY_AS_A_WALL)
+					for (int l = 0; l < 4; l++) {
+						intp adjTile = boundaryTile + MGEN_BOUNDARY_BRUSH[l];
+						if (adjTile.x >= 0 && adjTile.y >= 0 && adjTile.x < colCount && adjTile.y < rowCount) {
+							blueprint[adjTile.x][adjTile.y] = WALL;
+							dataTree->update(adjTile, 1);
+						}
 					}
 				}
 			}
@@ -147,6 +159,8 @@ void Map::testFillMap(int zones) {
 	// store the zone areas
 	memset(zoneCount, 0, sizeof zoneCount);
 	for (int i = 0; i < zones; i++) {
+		zoneRadius.push_back(0);
+
 		queue<intp> bfsq;
 		bfsq.push(zoneOrigins[i]);
 		zoneId[bfsq.front().x][bfsq.front().y] = i;
@@ -161,6 +175,8 @@ void Map::testFillMap(int zones) {
 					zoneId[adjTile.x][adjTile.y] = i;
 					zoneCount[i]++;
 					bfsq.push(adjTile);
+
+					zoneRadius[i] = mmax(manhattan(adjTile, zoneOrigins[i]), zoneRadius[i]);
 				}
 			}
 		}
@@ -282,11 +298,11 @@ void Map::testFillMap(int zones) {
 	vector<string> blockGenOrder;
 	vector<int> blockGenCount;
 	blockGenOrder.push_back("001");
-	blockGenCount.push_back(2);
+	blockGenCount.push_back(6);
 	blockGenOrder.push_back("110");
-	blockGenCount.push_back(10);
+	blockGenCount.push_back(15);
 	blockGenOrder.push_back("000");
-	blockGenCount.push_back(20);
+	blockGenCount.push_back(30);
 
 
 	int testTries = 50;
@@ -366,39 +382,49 @@ void Map::testFillMap(int zones) {
 
 	// create the actual objects following the blueprint
 	memset(tempFlags, 0, sizeof tempFlags);
+	memset(zoneMineCount, 0, sizeof zoneMineCount);
 	for (int i = 0; i < colCount; i++) {
 		for (int j = 0; j < rowCount; j++) {
-			if (blueprint[i][j] == WALL || blueprint[i][j] == PART) { // TEMP, parts are going to be invisible
+			if (blueprint[i][j] == WALL || blueprint[i][j] == TREE) { // TEMP trees as walls to save on rendering
 				mapObjects[i][j] = new MOWall(vec2(i, j));
 			}
-			else if (blueprint[i][j] == TREE) {
+			else if (blueprint[i][j] == PART){
+				mapObjects[i][j] = new MOWall(vec2(i, j), true);
+			}
+		/*	else if (blueprint[i][j] == TREE) {
 				mapObjects[i][j] = new MOWall(vec2(i, j));
 				mapObjects[i][j]->setModel(Resources::modelData["tree"]);
+			}*/
+			else if (blueprint[i][j] == ITEM) {
+				// TEMP every item is a resource for now
+				blueprint[i][j] = RESOURCE;
+				mapObjects[i][j] = new MOResource(vec2(i, j)); // will create a random resource pile
 			}
-			// TEMP draw the paths using items \:D/
-			else if (blueprint[i][j] == ITEM || blueprint[i][j] == PATH) {
-				mapObjects[i][j] = new MOItem(vec2(i, j), this);
+			else if (blueprint[i][j] == PATH) {
+				mapObjects[i][j] = new MOPath(this, vec2(i, j));
 			}
 			else if (blueprint[i][j] == CREATURE) {
-				mapObjects[i][j] = new MOCreature(vec2(i, j), "Slow", 10);
-				spreadThreat(vec2(i, j));
+				if (zoneId[i][j] < 0 || zoneId[i][j] >= zones) {
+					cout << "TODO map.cpp: creatures spawning on zone boundaries" << endl;
+				}
+				else {
+					int level = clamp(1, CREATURES_MAX_LVL, manhattan(intp(i, j), zoneOrigins[zoneId[i][j]]) / zoneRadius[zoneId[i][j]] * CREATURES_MAX_LVL + 1);
+					// TODO maybe store the creatures earlier
+					vector<Creature*> candidates = Resources::getCreaturesOfLevel(level);
+					Creature* tempCreature = candidates[rand() % candidates.size()];
+					mapObjects[i][j] =
+						new MOCreature(
+							vec2(i, j),
+							tempCreature,
+							rand() % (CREATURE_SPAWN_MAX[level - 1] - CREATURE_SPAWN_MIN[level - 1] + 1) + CREATURE_SPAWN_MIN[level - 1]
+						);
+					cout << "Map generation: Spawning a " << tempCreature->name << " stack at (" << i << ", " << j << ")" << endl;
+					spreadThreat(vec2(i, j));
+				}
 			}
 			else if (blueprint[i][j] == MINE) {
-				floatp modelOffset(0, 0);
-				for (int offs = 1; i - offs >= 0 && blueprint[i - offs][j] == PART; offs++) {
-					modelOffset.x -= 0.5f;
-				}
-				for (int offs = 1; i + offs < colCount && blueprint[i + offs][j] == PART; offs++) {
-					modelOffset.x += 0.5f;
-				}
-				for (int offs = 1; j - offs >= 0 && blueprint[i][j - offs] == PART; offs++) {
-					modelOffset.y -= 0.5f;
-				}
-				for (int offs = 1; j + offs < rowCount && blueprint[i][j + offs] == PART; offs++) {
-					modelOffset.y += 0.5f;
-				}
-				mapObjects[i][j] = new MOBuilding(vec2(i, j), modelOffset); // TODO add real mine object
-				//mapObjects[i][j]->setModel(Resources::modelData["mine"]);
+				mapObjects[i][j] = new MOMine(zoneMineCount[zoneId[i][j]]++, this, vec2(i, j));
+				// TODO add a real model ... mapObjects[i][j]->setModel(Resources::modelData["mine"]);
 			}
 			else {
 				mapObjects[i][j] = new MOEmpty(vec2(i, j));
@@ -410,7 +436,7 @@ void Map::testFillMap(int zones) {
 	for (int i = 0; i < zones; i++) {
 		cout << "Zone " << i << " origin is at (" << zoneOrigins[i].x << ", " << zoneOrigins[i].y << ")" << endl;
 		cout << "     contains " << zoneCount[i] << " tiles " << endl;
-		mapObjects[(int)zoneOrigins[i].x][(int)zoneOrigins[i].y] = new MOBuilding(vec2(zoneOrigins[i].x, zoneOrigins[i].y));
+		//mapObjects[(int)zoneOrigins[i].x][(int)zoneOrigins[i].y] = new MOBuilding(vec2(zoneOrigins[i].x, zoneOrigins[i].y));
 	}
 }
 
@@ -425,6 +451,32 @@ void Map::clearMap() {
 			threats[i][j].clear();
 		}
 	}
+}
+
+intp Map::factionStartingZone(int factionId) {
+	for (int i = 0; i < (int)zoneOrigins.size(); i++) {
+		if (zoneStartingFaction[i] == factionId){
+			return zoneOrigins[i];
+		}
+	}
+
+	// TODO potentially add better starting zone assignment
+	int candidateZone = -1;
+	for (int i = 0; i < (int)zoneOrigins.size(); i++) {
+		if (!zoneStartingFaction[i]){
+			if (!~candidateZone ||
+				(adjZones[i].size() < adjZones[candidateZone].size() && adjZones[i].size() > 1)) {
+				candidateZone = i;
+			}
+		}
+	}
+
+	if (!~candidateZone) {
+		return intp(0, 0);
+	}
+
+	zoneStartingFaction[candidateZone] = factionId;
+	return zoneOrigins[candidateZone];
 }
 
 void Map::removeObject(intp location) {

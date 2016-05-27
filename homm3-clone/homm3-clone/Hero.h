@@ -1,70 +1,33 @@
 #pragma once
 
-#include "MapObject.h"
+#include <functional>
 #include "FactionMember.h"
 #include "Constants.h"
+#include "CombatResult.h"
+#include "Creature.h"
 
-class Hero : public MapObject, public FactionMember {
+class Hero : public FactionMember {
 
 public:
-	Hero(FactionMember* _factionRepresentative, vec2 _position = vec2(0, 0))
-		: FactionMember(_factionRepresentative->getFactionId()), MapObject(_position) {
-		refresh();
-		for (int i = 0; i < HERO_UNIT_SLOTS; i++) {
-			creatures[i] = nullptr;
-		}
+	Hero(int _factionId, bool _isReal = true);
+	~Hero();
 
-		experience = 0;
-	}
+	void* getCreature(int index);
 
-	bool hasCreatures() {
-		return true;
-	}
+	int stackCount();
 
-	void* getCreature(int index) {
-		if (index > HERO_UNIT_SLOTS) {
-			return nullptr;
-		}
+	inline bool canMove(int distance);
 
-		return creatures[index];
-	}
+	bool move(int distance);
 
-	void draw(float size) {
-		glutSolidCone(0.1, 0.2, 5, 5);
-	}
+	void changeMovementPoints(int change);
 
-	void onCombatEnd(CombatResult result) {
-		if (result.winnerFaction == getFactionId()) {
-			experience += result.experience;
-		}
-		else {
-			// TODO kill the hero etc.
-		}
-	}
+	void refresh();
 
-	inline bool canMove(int distance) {
-		return movementPoints >= distance;
-	}
-
-	bool move(int distance) {
-		if (!canMove(distance)) {
-			return false;
-		}
-
-		movementPoints -= distance;
-		return true;
-	}
-
-	void changeMovementPoints(int change) {
-		movementPoints += change;
-	}
-
-	void refresh() {
-		movementPoints = HERO_BASE_MOVE_POINTS; // TODO modifiers
-	}
-
-private:
+	Creature* creatures[HERO_UNIT_SLOTS];
+	bool isReal; // is this just a creature container or a real hero
+	bool isDead;
 	int movementPoints;
+	int uniqueId;
 	int experience;
-	// TODO add creature and item storage
 };

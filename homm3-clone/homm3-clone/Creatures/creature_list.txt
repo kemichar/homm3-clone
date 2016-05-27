@@ -1,2 +1,7 @@
-Monster.txt
-Slow.txt
+Griffin.txt
+Pikeman.txt
+Angel.txt
+Archer.txt
+Cavalier.txt
+Monk.txt
+Swordsman.txt

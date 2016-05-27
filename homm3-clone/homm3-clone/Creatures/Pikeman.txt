@@ -1,0 +1,9 @@
+level 1
+baseDamageMin 1
+baseDamageMax 3
+attack 4
+defense 5
+speed 4
+maxHealth 10
+experience 10
+plural Pikemen

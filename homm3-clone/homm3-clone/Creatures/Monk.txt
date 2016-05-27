@@ -1,0 +1,10 @@
+level 5
+baseDamageMin 10
+baseDamageMax 12
+attack 12
+defense 7
+speed 5
+maxHealth 30
+experience 10
+plural Monks
+canShoot true

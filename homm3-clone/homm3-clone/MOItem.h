@@ -1,24 +1,20 @@
 #pragma once
 
 #include "MapObject.h"
-#include "Map.h"
 
 using namespace glm;
 
 class MOItem : public MapObject {
 
 public:
-	MOItem(intp _pos, Map* _map);
+	MOItem(intp _pos);
 
-	bool isBlocking();
+	bool isBlocking() override;
 
-	bool isHolding();
+	bool isHolding() override;
 
-	virtual void interact();
+	virtual void interact() override;
 
-	virtual void draw(float size);
-
-private:
-	Map* mapInstance;
+	virtual void draw(float size) override;
 
 };

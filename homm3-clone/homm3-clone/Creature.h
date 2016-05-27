@@ -20,6 +20,7 @@ public:
 	Creature(string _name, int _count = 1, int _factionId = 0);
 	Creature(string _name, int _count, FactionMember* member);
 	Creature(string _name, string _infoString, int _count = 1, int _factionId = 0);
+	Creature(Creature* _original, int _count = 1, int _factionId = 0);
 	
 	void refresh();
 	void takeDamageFrom(Creature *opponentStack);
@@ -29,13 +30,16 @@ public:
 
 	string name;
 	int count;
+	int level;
+	int baseDamageMin;
+	int baseDamageMax;
 	int attack;
 	int defense;
 	int speed;
-	int attackRange;
-	int moveRange;
 	int maxHealth;
 	int health; // health of the first creature on the stack
+	int experience;
+	string plural;
 
 	vec2 combatPos;
 

@@ -5,8 +5,11 @@
 class MOEmpty : public MapObject {
 
 public:
-	MOEmpty(intp _pos) : MapObject(_pos){
-		objectCode = 0;
-		objectName = "EmptyTile";
-	}
+	MOEmpty(intp _pos);
+
+	void interact() override;
+
+	bool isBlocking() override;
+
+	bool isHolding() override;
 };

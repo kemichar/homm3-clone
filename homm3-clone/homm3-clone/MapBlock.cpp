@@ -8,7 +8,7 @@ MapBlock::MapBlock(string _properties, vector<string> _data) : properties(_prope
 MapBlock::MapBlock(vector<string> _everything) : properties(_everything[0]) {
 	height = _everything.size() - 1;
 	width = _everything[1].size();
-	for (int i = 1; i < _everything.size(); i++) {
+	for (int i = 1; i < (int)_everything.size(); i++) {
 		data.push_back(_everything[i]);
 	}
 }
@@ -19,7 +19,7 @@ bool MapBlock::match(string requirements) {
 		printf("Block properties size and requirements size don't match.\n");
 		return false;
 	}
-	for (int i = 0; i < properties.size(); i++) {
+	for (int i = 0; i < (int)properties.size(); i++) {
 		if (properties[i] != requirements[i] && requirements[i] != 'x') {
 			return false;
 		}

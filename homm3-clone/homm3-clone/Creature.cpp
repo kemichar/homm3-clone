@@ -8,12 +8,15 @@ Creature::Creature(string _name, int _count, int _factionId) :
 	name(_name), count(_count), FactionMember(_factionId) {
 	Creature* original = Resources::creatureData.at(_name);
 
+	level = original->level;
+	baseDamageMin = original->baseDamageMin;
+	baseDamageMax = original->baseDamageMax;
 	attack = original->attack;
 	defense = original->defense;
 	speed = original->speed;
-	moveRange = original->moveRange;
 	maxHealth = original->maxHealth;
-	// TODO copy everything else
+	experience = original->experience;
+	plural = original->plural;
 }
 
 Creature::Creature(string _name, int _count, FactionMember * member) :
@@ -25,27 +28,70 @@ Creature::Creature(string _name, string _infoString, int _count, int _factionId)
 	stringstream ss(_infoString);
 	string attribute;
 	while (ss >> attribute) {
-		int value;
-		ss >> value;
-		if (attribute == "attack") {
+		if (attribute == "level") {
+			int value;
+			ss >> value;
+			level = value;
+		}
+		else if (attribute == "baseDamageMin") {
+			int value;
+			ss >> value;
+			baseDamageMin = value;
+		}
+		else if (attribute == "baseDamageMax") {
+			int value;
+			ss >> value;
+			baseDamageMax = value;
+		}
+		else if (attribute == "attack") {
+			int value;
+			ss >> value;
 			attack = value;
 		}
 		else if (attribute == "defense") {
+			int value;
+			ss >> value;
 			defense = value;
 		}
 		else if (attribute == "speed") {
+			int value;
+			ss >> value;
 			speed = value;
 		}
-		else if (attribute == "attackRange") {
-			attackRange = value;
-		}
-		else if (attribute == "moveRange") {
-			moveRange = value;
-		}
 		else if (attribute == "maxHealth") {
+			int value;
+			ss >> value;
 			maxHealth = value;
 		}
+		else if (attribute == "experience") {
+			int value;
+			ss >> value;
+			experience = value;
+		}
+		else if (attribute == "plural") {
+			string value;
+			ss >> value;
+			plural = value;
+		}
+		else {
+			string value;
+			ss >> value;
+		}
 	}
+}
+
+Creature::Creature(Creature * _original, int _count, int _factionId) :
+	name(_original->name), count(_count), FactionMember(_factionId) {
+
+	level = _original->level;
+	baseDamageMin = _original->baseDamageMin;
+	baseDamageMax = _original->baseDamageMax;
+	attack = _original->attack;
+	defense = _original->defense;
+	speed = _original->speed;
+	maxHealth = _original->maxHealth;
+	experience = _original->experience;
+	plural = _original->plural;
 }
 
 void Creature::refresh() {
@@ -53,8 +99,22 @@ void Creature::refresh() {
 }
 
 void Creature::takeDamageFrom(Creature * opponentStack) {
-	// TODO modify damage calculation?
-	int totalDamage = (opponentStack->attack - defense) * opponentStack->count;
+	string report = "";
+	if (opponentStack->count == 1) {
+		report += "1 " + opponentStack->name + " attacks, ";
+	}
+	else {
+		report += to_string(opponentStack->count) + " " + opponentStack->plural + " attack, ";
+	}
+
+	float attackModifier = max(0, opponentStack->attack - defense) * 0.05f;
+	float defenseModifier = max(0, defense - opponentStack->attack) * 0.025f;
+	float baseDamage =
+		rand() % (opponentStack->baseDamageMax - opponentStack->baseDamageMin + 1)
+		+ opponentStack->baseDamageMin;
+	int totalDamage = baseDamage * opponentStack->count * (1 + attackModifier) * (1 - defenseModifier);
+
+	report += "dealing " + to_string(totalDamage) + " damage.";
 
 	count -= totalDamage / maxHealth;
 	health -= totalDamage % maxHealth;
@@ -65,10 +125,14 @@ void Creature::takeDamageFrom(Creature * opponentStack) {
 	if (count < 0) {
 		count = 0;
 	}
+
+	cout << "Combat: " << report << endl;
 }
 
 void Creature::draw(float size) {
 	glPushMatrix();
+	vec3 tempColor = COLORS[factionId];
+	glColor3f(tempColor.r, tempColor.g, tempColor.b);
 	glutWireCone(size / 3, size, 10, 10);
 	glPopMatrix();
 }
@@ -76,20 +140,18 @@ void Creature::draw(float size) {
 vector<string> Creature::getDescription() {
 	description.clear();
 
-	description.push_back("   " + name);
+	if (count == 1) {
+		description.push_back("  " + name);
+	}
+	else {
+		description.push_back("  " + plural);
+	}
 	description.push_back("\n");
 	description.push_back("Attack: " + to_string(attack));
 	description.push_back("Defense: " + to_string(defense));
+	description.push_back("Damage: " + to_string(baseDamageMin) + "-" + to_string(baseDamageMax));
 	description.push_back("Speed: " + to_string(speed));
 	description.push_back("Health: " + to_string(health) + '/' + to_string(maxHealth));
 
 	return description;
-}
-
-inline bool operator< (const Creature& lhs, const Creature& rhs) {
-	return lhs.speed < rhs.speed;
-}
-
-inline bool operator> (const Creature& lhs, const Creature& rhs) {
-	return  operator< (rhs, lhs);
 }

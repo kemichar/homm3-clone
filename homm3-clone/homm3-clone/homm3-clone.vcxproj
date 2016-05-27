@@ -150,12 +150,15 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AIPlayer.h" />
     <ClInclude Include="BIT.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CombatLogic.h" />
     <ClInclude Include="CombatResult.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="Creature.h" />
+    <ClInclude Include="Currency.h" />
+    <ClInclude Include="DebugParameters.h" />
     <ClInclude Include="FactionMember.h" />
     <ClInclude Include="FactionSetup.h" />
     <ClInclude Include="GameLogic.h" />
@@ -167,10 +170,15 @@
     <ClInclude Include="MOCreature.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="MOEmpty.h" />
+    <ClInclude Include="MOHero.h" />
     <ClInclude Include="MOItem.h" />
+    <ClInclude Include="MOMine.h" />
+    <ClInclude Include="MOPath.h" />
+    <ClInclude Include="MOResource.h" />
     <ClInclude Include="MOWall.h" />
     <ClInclude Include="objglm\glmint.h" />
     <ClInclude Include="objglm\objglm.h" />
+    <ClInclude Include="Pathfinder.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Resources.h" />
     <ClInclude Include="stdafx.h" />
@@ -180,15 +188,26 @@
     <ClInclude Include="ViewManager.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AIPlayer.cpp" />
+    <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CombatLogic.cpp" />
     <ClCompile Include="Creature.cpp" />
     <ClCompile Include="GameLogic.cpp" />
+    <ClCompile Include="Hero.cpp" />
     <ClCompile Include="homm3-clone.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="MapBlock.cpp" />
     <ClCompile Include="MapObject.cpp" />
+    <ClCompile Include="MOBuilding.cpp" />
+    <ClCompile Include="MOCreature.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="MOEmpty.cpp" />
+    <ClCompile Include="MOHero.cpp" />
     <ClCompile Include="MOItem.cpp" />
+    <ClCompile Include="MOMine.cpp" />
+    <ClCompile Include="MOPath.cpp" />
+    <ClCompile Include="MOResource.cpp" />
+    <ClCompile Include="MOWall.cpp" />
     <ClCompile Include="objglm\glmimg.c" />
     <ClCompile Include="objglm\glmimg_devil.c" />
     <ClCompile Include="objglm\glmimg_jpg.c" />
@@ -197,9 +216,12 @@
     <ClCompile Include="objglm\glmimg_sim.c" />
     <ClCompile Include="objglm\glm_util.c" />
     <ClCompile Include="objglm\objglm.c" />
+    <ClCompile Include="Pathfinder.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Resources.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="UIButton.cpp" />
+    <ClCompile Include="ViewManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

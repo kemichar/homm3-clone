@@ -9,16 +9,14 @@
 class Map {
 
 public:
-	enum Blueprint {
-		UNKNOWN, EMPTY, WALL, PATH, CREATURE, ITEM, MINE, TREE, PART
-	};
-
 	Map();
 	Map(int _colCount, int _rowCount);
 
 	void fillMap();
 	void testFillMap(int zones = 5);
 	void clearMap();
+
+	intp factionStartingZone(int factionId);
 
 	void removeObject(intp location);
 	MapObject* getObject(intp location);
@@ -32,23 +30,29 @@ public:
 
 	// stores the map generation data and is used to generate map objects
 	int blueprint[MAP_MAX_COLS][MAP_MAX_ROWS];
+
+	int colCount;
+	int rowCount;
+
 private:
 	void spreadThreat(intp pos);
 	void removeThreat(intp pos);
 
 	MapObject* mapObjects[MAP_MAX_COLS][MAP_MAX_ROWS];
-	int colCount;
-	int rowCount;
+
+	int zoneStartingFaction[MGEN_ZONE_LIMIT];
 
 	// map generation data
 	vector<intp> zoneOrigins;
+	vector<float> zoneRadius;
 	vector<intp> boundaries[MGEN_ZONE_LIMIT][MGEN_ZONE_LIMIT];
-	vector<intp> subzoneOrigins[MGEN_ZONE_LIMIT];
-	vector<intp> subBoundaries[MGEN_ZONE_LIMIT][MGEN_SUBZONE_LIMIT][MGEN_SUBZONE_LIMIT];
+	vector<int> adjZones[MGEN_ZONE_LIMIT];
+
 	// tile zone identifiers; if zoneId >= zones denotes a boundary tile
 	int zoneId[MAP_MAX_COLS][MAP_MAX_ROWS];
 	int zoneCount[MGEN_ZONE_LIMIT];
-	int subzoneId[MAP_MAX_COLS][MAP_MAX_ROWS];
+	int zoneMineCount[MGEN_ZONE_LIMIT];
+
 	// temporary
 	intp tempData[MAP_MAX_COLS][MAP_MAX_ROWS];
 	int tempFlags[MAP_MAX_COLS][MAP_MAX_ROWS];

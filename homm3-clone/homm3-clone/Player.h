@@ -1,72 +1,61 @@
 #pragma once
 
 #include <vector>
-#include "Hero.h"
+#include "MOHero.h"
+#include "Currency.h"
+#include "ViewManager.h"
+#include "Pathfinder.h"
 
 using namespace std;
 
-
+/*
+	A storage class for owned heroes, resources and mines of a single player of the game.
+	Handles hero selection, periodic resource gains and other turn-related updates.
+*/
 class Player : public FactionMember{
 
 public:
-	Player(int _factionId) : FactionMember(_factionId) {
-		selectedHero = -1;
-	}
+	
+	Player(int _factionId);
 
-	void addHero(Hero* hero) {
-		heroes.push_back(hero);
-		if (heroes.size() == 1) {
-			selectedHero = 0;
-		}
-	}
+	virtual void startTurn();
+//	virtual void onCombatEnd(MOHero* hero, CombatResult result);
+	// adds the provided hero object to this player's owned heroes
+	void addHeroObject(MOHero* hero);
+	// creates and adds a new hero to this player's owned heroes
+	void addNewHero(string name = ""); // TODO name adding or sth.
+	// selects the next hero in the list; used for scrollable display lists of heroes
+	MOHero* setNextHero();
+	// selects the previous hero in the list; used for scrollable display lists of heroes
+	MOHero* setPreviousHero();
+	// selects the hero at the provided index; if index is out of range takes it modulo hero count
+	MOHero* setHeroByIndex(int index);
+	MOHero * setHeroByUniqueId(int uniqueId);
+	// returns the currently selected hero
+	MOHero* getCurrentHero();
+	// removes the currently selected hero from the list of active heroes
+	void archiveHero(int index);
+	int getCurrentHeroIndex();
+	// used at turn start to refresh the owned heroes' properties (such as movement points)
+	void refresh();
+	// sets the default map spawn location of the player's heroes
+	void setSpawnPosition(intp _spawnPosition);
 
-	Hero* setNextHero() {
-		if (heroes.size() == 0) {
-			return nullptr;
-		}
+	// the list of owned hero objects
+	vector<MOHero*> heroObjects;
+	// the player's owned currencies; for details see Currency; currencies are updated every turn
+	// depending on the number of controlled mines
+	Currency wallet;
+	// the counts of controlled mine objects, one for each resource type
+	int minesControlled[_RESOURCE_END];
 
-		selectedHero = (selectedHero + 1) % heroes.size();
-		return getCurrentHero();
-	}
-
-	Hero* setPreviousHero() {
-		if (heroes.size() == 0) {
-			return nullptr;
-		}
-
-		selectedHero = (selectedHero + heroes.size() - 1) % heroes.size();
-		return getCurrentHero();
-	}
-
-	Hero* setHeroByIndex(int index) {
-		if (heroes.size() == 0) {
-			return nullptr;
-		}
-
-		selectedHero = index % heroes.size();
-		return getCurrentHero();
-	}
-
-	Hero* getCurrentHero() {
-		if (heroes.size() == 0) {
-			return nullptr;
-		}
-
-		return heroes[selectedHero];
-	}
-
-	int getCurrentHeroIndex() {
-		return selectedHero;
-	}
-
-	void refresh() {
-		for (Hero* hero : heroes) {
-			hero->refresh();
-		}
-	}
-
-	vector<Hero*> heroes;
+	Pathfinder pf;
 
 private:
+	// the history of dead / deleted heroes
+	vector<MOHero*> heroHistory;
+	// the currently active hero (only relevant if the player is active)
 	int selectedHero;
+	// the default map spawn location of the player's heroes
+	intp spawnPosition;
 };

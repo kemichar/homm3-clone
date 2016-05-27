@@ -1,0 +1,9 @@
+level 6
+baseDamageMin 15
+baseDamageMax 25
+attack 15
+defense 15
+speed 7
+maxHealth 100
+experience 10
+plural Cavaliers

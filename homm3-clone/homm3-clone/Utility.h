@@ -35,6 +35,10 @@ struct intp {
 	bool operator!=(const intp &a) const {
 		return !(x == a.x && y == a.y);
 	}
+
+	bool operator<(const intp &a) const {
+		return (x < a.x) || (x == a.x && y < a.y);
+	}
 	
 	int x;
 	int y;

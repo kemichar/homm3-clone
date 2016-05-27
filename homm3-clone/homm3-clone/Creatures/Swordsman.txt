@@ -1,0 +1,9 @@
+level 4
+baseDamageMin 6
+baseDamageMax 9
+attack 10
+defense 12
+speed 5
+maxHealth 35
+experience 10
+plural Swordsmen

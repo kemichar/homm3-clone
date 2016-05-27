@@ -1,68 +1,23 @@
 #pragma once
 
 #include "MapObject.h"
-#include "FactionMember.h"
-#include "GameLogic.h"
+#include "Hero.h"
 
-class MOCreature : public MapObject, public FactionMember {
+class MOCreature : public MapObject {
 
 public:
-	MOCreature(vec2 _pos, string _creatureName, vector<int> _counts)
-		: MapObject(_pos), FactionMember(0) {
-		objectCode = 4;
-		objectName = "Creature: " + _creatureName;
+	MOCreature(intp _pos, string _creatureName, vector<int> _counts);
 
-		for (int i = 0; i < (int)_counts.size() && i < HERO_UNIT_SLOTS; i++) {
-			creatures[i] = new Creature(_creatureName, _counts[i]);
-		}
-	}
+	MOCreature(intp _pos, string _creatureName, int _count);
 
-	MOCreature(vec2 _pos, string _creatureName, int _count)
-		: MapObject(_pos), FactionMember(0) {
-		objectCode = 4;
-		objectName = "Creature: " + _creatureName;
+	MOCreature(intp _pos, Creature* _creatureOriginal, int _count);
 
-		creatures[0] = new Creature(_creatureName, _count);
-	}
+	bool isBlocking() override;
 
-	void onCombatEnd(CombatResult result) {
-		if (result.winnerFaction != getFactionId()) {
-			GameLogic::instance().map->removeObject(pos);
-		}
-	}
+	virtual bool isHolding() override;
 
-	bool hasCreatures() {
-		return true;
-	}
+	virtual void interact() override;
 
-	bool isBlocking() {
-		return true;
-	}
-
-	virtual bool isHolding() {
-		return true;
-	}
-
-	virtual void interact() {
-		// no way to interact because this object is blocking
-	}
-
-	virtual void draw(float size) {
-		for (int i = 0; i < HERO_UNIT_SLOTS; i++) {
-			if (creatures[i] != nullptr && creatures[i]->count > 0) {
-				creatures[i]->draw(size);
-				return;
-			}
-		}
-
-		// TODO modify error report(s)
-		printf("Creatures not assigned to %s..\n", objectName.c_str());
-		glPushMatrix();
-		glColor3f(1, 0, 0);
-		glutSolidCube(size);
-		glPopMatrix();
-	}
-
-private:
+	virtual void draw(float size) override;
 
 };

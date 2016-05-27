@@ -5,32 +5,12 @@
 class MOWall : public MapObject {
 
 public:
-	MOWall(intp _pos, bool _invisible = false) : MapObject(_pos), invisible(_invisible) {
-		objectCode = 1;
-		objectName = "Wall" + string((_invisible ? " (invisible)" : ""));
-	}
+	MOWall(intp _pos, bool invisible = false);
 
-	bool isBlocking() {
-		return true;
-	}
+	bool isBlocking() override;
 
-	virtual void draw(float size) {
-		if (invisible) {
-			return;
-		}
+	virtual void draw(float size) override;
 
-		if (model == nullptr) {
-			glPushMatrix();
-			glColor3f(0.2, 0.2, 0.2);
-			glutSolidCube(size * 0.7);
-			glPopMatrix();
-		}
-		else {
-			MapObject::draw(size);
-		}
-	}
-
-private:
-	bool invisible;
+	virtual void interact() override;
 
 };
