@@ -271,7 +271,7 @@ glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode);
  *            GLM_FLAT and GLM_SMOOTH should not both be specified.
  */
 GLvoid
-glmDraw(GLMmodel* model, GLuint mode);
+glmDraw(GLMmodel* model, GLuint mode, int usePreparedColor);
 
 void
 initModel(GLMmodel* model);

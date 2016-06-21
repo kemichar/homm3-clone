@@ -6,5 +6,7 @@ defense 8
 speed 6
 maxHealth 25
 experience 10
+growth 7
+cost 200
 plural Griffins
 canFly true

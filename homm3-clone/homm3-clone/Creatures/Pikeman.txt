@@ -6,4 +6,6 @@ defense 5
 speed 4
 maxHealth 10
 experience 10
+growth 14
+cost 60
 plural Pikemen

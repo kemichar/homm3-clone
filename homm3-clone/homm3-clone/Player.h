@@ -3,10 +3,7 @@
 #include <vector>
 #include "MOHero.h"
 #include "Currency.h"
-#include "ViewManager.h"
 #include "Pathfinder.h"
-
-using namespace std;
 
 /*
 	A storage class for owned heroes, resources and mines of a single player of the game.
@@ -19,11 +16,14 @@ public:
 	Player(int _factionId);
 
 	virtual void startTurn();
+
 //	virtual void onCombatEnd(MOHero* hero, CombatResult result);
-	// adds the provided hero object to this player's owned heroes
+
+	// adds the hero object to this player's owned heroes
 	void addHeroObject(MOHero* hero);
 	// creates and adds a new hero to this player's owned heroes
-	void addNewHero(string name = ""); // TODO name adding or sth.
+	void addNewHero(std::string name = ""); // TODO name adding or sth.
+	int heroCount();
 	// selects the next hero in the list; used for scrollable display lists of heroes
 	MOHero* setNextHero();
 	// selects the previous hero in the list; used for scrollable display lists of heroes
@@ -31,31 +31,47 @@ public:
 	// selects the hero at the provided index; if index is out of range takes it modulo hero count
 	MOHero* setHeroByIndex(int index);
 	MOHero * setHeroByUniqueId(int uniqueId);
+	MOHero * getHeroByUniqueId(int uniqueId);
 	// returns the currently selected hero
 	MOHero* getCurrentHero();
 	// removes the currently selected hero from the list of active heroes
-	void archiveHero(int index);
+	virtual void archiveHero(int index);
 	int getCurrentHeroIndex();
 	// used at turn start to refresh the owned heroes' properties (such as movement points)
 	void refresh();
 	// sets the default map spawn location of the player's heroes
 	void setSpawnPosition(intp _spawnPosition);
+	// removes the location from the list of owned buildings
+	void disownBuilding(intp location);
+	
+	void selectCastle(intp location);
+
+	intp getSelectedCastle();
+
+	void selectNextCastle();
+
+	void selectPreviousCastle();
 
 	// the list of owned hero objects
-	vector<MOHero*> heroObjects;
-	// the player's owned currencies; for details see Currency; currencies are updated every turn
-	// depending on the number of controlled mines
+	std::vector<MOHero*> heroObjects;
+	/*
+		The player's owned currencies; for details see Currency; currencies are updated every turn
+		(depending on the number of controlled mines) through refresh().
+	*/
 	Currency wallet;
 	// the counts of controlled mine objects, one for each resource type
 	int minesControlled[_RESOURCE_END];
+	std::vector<intp> buildingsControlled;
 
 	Pathfinder pf;
 
-private:
+protected:
 	// the history of dead / deleted heroes
-	vector<MOHero*> heroHistory;
+	std::vector<MOHero*> heroHistory;
 	// the currently active hero (only relevant if the player is active)
 	int selectedHero;
 	// the default map spawn location of the player's heroes
 	intp spawnPosition;
+	// the last activated castle (useful only for non-AI players)
+	intp selectedCastle;
 };

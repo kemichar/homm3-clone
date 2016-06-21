@@ -6,5 +6,7 @@ defense 20
 speed 12
 maxHealth 200
 experience 10
+growth 1
+cost 3000
 plural Angels
 canFly true

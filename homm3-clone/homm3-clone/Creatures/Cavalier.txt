@@ -6,4 +6,6 @@ defense 15
 speed 7
 maxHealth 100
 experience 10
+growth 2
+cost 1000
 plural Cavaliers

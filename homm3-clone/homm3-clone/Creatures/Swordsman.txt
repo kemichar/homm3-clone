@@ -6,4 +6,6 @@ defense 12
 speed 5
 maxHealth 35
 experience 10
+growth 4
+cost 300
 plural Swordsmen

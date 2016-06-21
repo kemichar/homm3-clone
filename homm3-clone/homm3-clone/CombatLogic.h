@@ -6,17 +6,17 @@
 #include "MapObject.h"
 #include "Hero.h"
 #include "Creature.h"
-#include "CombatResult.h"
-
-using namespace std;
 
 class CombatLogic {
 
 public:
+	// TEMP
+	void threadSleep();
+
 	void setupCombat(MapObject* _attackerObject, MapObject* _defenderObject);
 	void nextCreature();
-	void move(vec2 targetPos, int direction);
-	void move(vec2 targetPos, vec2 direction);
+	void move(intp targetPos, int direction);
+	void move(intp targetPos, intp direction);
 	void endCombat(int winnerFaction);
 
 	// TODO move to a separate class
@@ -24,6 +24,7 @@ public:
 
 	Creature* getActiveCreature();
 	int getActiveFaction();
+	bool isAiActive();
 
 	// TODO add ranged attack, add flying
 	// void attack(vec2 target);
@@ -34,10 +35,10 @@ public:
 	int defenderFaction;
 
 	int currentCreature;
-	vector<vec2> validMoves;
+	std::vector<intp> validMoves;
 
-	vector<int> lastActive;
-	vector<Creature*> creatures;
+	std::vector<int> lastActive;
+	std::vector<Creature*> creatures;
 
 	static CombatLogic& instance();
 	CombatLogic(CombatLogic const&) = delete;
@@ -46,7 +47,7 @@ public:
 private:
 	CombatLogic();
 
-	bool isMoveValid(vec2 moveTarget);
+	bool isMoveValid(intp moveTarget);
 
 	void calcValidMoves();
 

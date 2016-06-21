@@ -6,14 +6,14 @@ MOBuilding::MOBuilding(Map * map, intp _pos, int _factionId)
 	for (int offs = 1; pos.x - offs >= 0 && map->blueprint[pos.x - offs][pos.y] == PART; offs++) {
 		modelOffset.x -= 0.5f;
 	}
+	for (int offs = 1; pos.y + offs < map->rowCount && map->blueprint[pos.x][pos.y + offs] == PART; offs++) {
+		modelOffset.y += 0.5f;
+	}
 	for (int offs = 1; pos.x + offs < map->colCount && map->blueprint[pos.x + offs][pos.y] == PART; offs++) {
 		modelOffset.x += 0.5f;
 	}
 	for (int offs = 1; pos.y - offs >= 0 && map->blueprint[pos.x][pos.y - offs] == PART; offs++) {
 		modelOffset.y -= 0.5f;
-	}
-	for (int offs = 1; pos.y + offs < map->rowCount && map->blueprint[pos.x][pos.y + offs] == PART; offs++) {
-		modelOffset.y += 0.5f;
 	}
 }
 
@@ -25,7 +25,7 @@ bool MOBuilding::isHolding() {
 	return true;
 }
 
-void MOBuilding::draw(float size) {
+void MOBuilding::draw(float size, bool mapDependency) {
 	if (model == nullptr) {
 		glPushMatrix();
 		if (modelOffset != floatp(0, 0)) {
@@ -40,7 +40,14 @@ void MOBuilding::draw(float size) {
 		glPopMatrix();
 	}
 	else {
-		glTranslatef(modelOffset.x * size / 2, modelOffset.y * size / 2, size / 2);
-		drawModel(model);
+		if (mapDependency) {
+			glTranslatef(modelOffset.x * size, modelOffset.y * size, size / 2);
+		}
+
+		// TEMP COLORING
+		if (isControllable) {
+			glColor3f(COLORS[factionId].r, COLORS[factionId].g, COLORS[factionId].b);
+		}
+		glmDraw(model, GLM_COLOR | GLM_SMOOTH, (int)isControllable);
 	}
 }

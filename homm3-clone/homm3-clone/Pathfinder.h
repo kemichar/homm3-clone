@@ -42,9 +42,9 @@ public:
 	std::set<intp> reachableItems;
 	std::set<intp> reachableBuildings;
 
-private:
 	Map* map;
 
+private:
 	bool isBuilding(MapObject* object);
 	bool isItem(MapObject* object);
 };

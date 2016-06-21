@@ -14,7 +14,7 @@ bool MOWall::isBlocking() {
 	return true;
 }
 
-void MOWall::draw(float size) {
+void MOWall::draw(float size, bool mapDependency) {
 	if (objectType == PART) {
 		return;
 	}
@@ -24,7 +24,7 @@ void MOWall::draw(float size) {
 		glutSolidCube(size * 0.7);
 	}
 	else {
-		MapObject::draw(size);
+		MapObject::draw(size, mapDependency);
 	}
 }
 

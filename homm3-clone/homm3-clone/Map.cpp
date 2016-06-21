@@ -7,7 +7,7 @@
 #include "MOItem.h"
 #include "MOEmpty.h"
 #include "MOWall.h"
-#include "MOBuilding.h"
+#include "MOCastle.h"
 #include "MOCreature.h"
 #include "MOResource.h"
 #include "MOPath.h"
@@ -19,7 +19,6 @@
 Map::Map() : dataTree(nullptr) {}
 
 Map::Map(int _colCount, int _rowCount) : colCount(_colCount), rowCount(_rowCount), dataTree(nullptr) {
-	srand(time(0));
 }
 
 void Map::fillMap() {/*
@@ -88,9 +87,10 @@ void Map::testFillMap(int zones) {
 	// spread out the zone origins
 	for (int i = 0; i < zones; i++) {
 		float bestDist = 0;
-		vec2 bestOrigin(0, 0);
+		intp bestOrigin(0, 0);
 		for (int j = 0; j < MGEN_ORIGIN_CANDIDATES; j++) {
-			vec2 candidate(rand() % colCount, rand() % rowCount);
+			// TEMP castles (at origins) will be 3 wide and 2 high + 1 free row under to be accessible
+			intp candidate(rand() % (colCount - 2) + 1, rand() % (rowCount - 2) + 1); 
 			float currDist = oo;
 			for (int k = 0; k < i; k++) {
 				currDist = mmin(currDist, euclid(zoneOrigins[k], candidate));
@@ -101,6 +101,13 @@ void Map::testFillMap(int zones) {
 			}
 		}
 		zoneOrigins.push_back(bestOrigin);
+		// TEMP castle layout
+		blueprint[bestOrigin.x][bestOrigin.y] = CASTLE;
+		blueprint[bestOrigin.x - 1][bestOrigin.y] = PART;
+		blueprint[bestOrigin.x - 1][bestOrigin.y + 1] = PART;
+		blueprint[bestOrigin.x][bestOrigin.y + 1] = PART;
+		blueprint[bestOrigin.x + 1][bestOrigin.y + 1] = PART;
+		blueprint[bestOrigin.x + 1][bestOrigin.y] = PART;
 	}
 
 	// find the Voronoi zone boundaries
@@ -261,7 +268,8 @@ void Map::testFillMap(int zones) {
 			for (int j = 0; j < HERO_MOVE_DIRS; j++) {
 				intp adjTile = currTile + HERO_MOVE_DIR[j];
 				if (adjTile.x >= 0 && adjTile.x < colCount && adjTile.y >= 0 && adjTile.y < rowCount &&
-					blueprint[adjTile.x][adjTile.y] != WALL && tempFlags[adjTile.x][adjTile.y] != i) {
+					(blueprint[adjTile.x][adjTile.y] != WALL && blueprint[adjTile.x][adjTile.y] != PART)
+					&& tempFlags[adjTile.x][adjTile.y] != i) {
 					tempFlags[adjTile.x][adjTile.y] = i;
 					tempData[adjTile.x][adjTile.y] = currTile;
 					bfsq.push(adjTile);
@@ -300,7 +308,7 @@ void Map::testFillMap(int zones) {
 	blockGenOrder.push_back("001");
 	blockGenCount.push_back(6);
 	blockGenOrder.push_back("110");
-	blockGenCount.push_back(15);
+	blockGenCount.push_back(25);
 	blockGenOrder.push_back("000");
 	blockGenCount.push_back(30);
 
@@ -385,20 +393,23 @@ void Map::testFillMap(int zones) {
 	memset(zoneMineCount, 0, sizeof zoneMineCount);
 	for (int i = 0; i < colCount; i++) {
 		for (int j = 0; j < rowCount; j++) {
-			if (blueprint[i][j] == WALL || blueprint[i][j] == TREE) { // TEMP trees as walls to save on rendering
+			if (blueprint[i][j] == WALL) {
 				mapObjects[i][j] = new MOWall(vec2(i, j));
 			}
 			else if (blueprint[i][j] == PART){
 				mapObjects[i][j] = new MOWall(vec2(i, j), true);
 			}
-		/*	else if (blueprint[i][j] == TREE) {
+			else if (blueprint[i][j] == TREE) {
 				mapObjects[i][j] = new MOWall(vec2(i, j));
 				mapObjects[i][j]->setModel(Resources::modelData["tree"]);
-			}*/
+			}
 			else if (blueprint[i][j] == ITEM) {
 				// TEMP every item is a resource for now
 				blueprint[i][j] = RESOURCE;
 				mapObjects[i][j] = new MOResource(vec2(i, j)); // will create a random resource pile
+			}
+			else if (blueprint[i][j] == CASTLE) {
+				mapObjects[i][j] = new MOCastle(this, vec2(i, j));
 			}
 			else if (blueprint[i][j] == PATH) {
 				mapObjects[i][j] = new MOPath(this, vec2(i, j));
@@ -423,7 +434,7 @@ void Map::testFillMap(int zones) {
 				}
 			}
 			else if (blueprint[i][j] == MINE) {
-				mapObjects[i][j] = new MOMine(zoneMineCount[zoneId[i][j]]++, this, vec2(i, j));
+				mapObjects[i][j] = new MOMine(RES_MINE_SPAWN_ORDER[zoneMineCount[zoneId[i][j]]++ % _RESOURCE_END], this, vec2(i, j));
 				// TODO add a real model ... mapObjects[i][j]->setModel(Resources::modelData["mine"]);
 			}
 			else {
@@ -436,7 +447,6 @@ void Map::testFillMap(int zones) {
 	for (int i = 0; i < zones; i++) {
 		cout << "Zone " << i << " origin is at (" << zoneOrigins[i].x << ", " << zoneOrigins[i].y << ")" << endl;
 		cout << "     contains " << zoneCount[i] << " tiles " << endl;
-		//mapObjects[(int)zoneOrigins[i].x][(int)zoneOrigins[i].y] = new MOBuilding(vec2(zoneOrigins[i].x, zoneOrigins[i].y));
 	}
 }
 
@@ -444,6 +454,7 @@ void Map::clearMap() {
 	for (int i = 0; i < colCount; i++) {
 		for (int j = 0; j < rowCount; j++) {
 			delete mapObjects[i][j];
+			mapObjects[i][j] = nullptr;
 		}
 	}
 	for (int i = 0; i < colCount; i++) {
@@ -476,6 +487,7 @@ intp Map::factionStartingZone(int factionId) {
 	}
 
 	zoneStartingFaction[candidateZone] = factionId;
+	mapObjects[zoneOrigins[candidateZone].x][zoneOrigins[candidateZone].y]->setControl(factionId);
 	return zoneOrigins[candidateZone];
 }
 
@@ -487,6 +499,10 @@ void Map::removeObject(intp location) {
 }
 
 MapObject * Map::getObject(intp location) {
+	if (location.x < 0 || location.x >= colCount || location.y < 0 || location.y >= rowCount) {
+		return nullptr;
+	}
+
 	return mapObjects[location.x][location.y];
 }
 

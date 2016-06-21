@@ -1,10 +1,10 @@
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\vc140.pdb
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\vc140.idb
-c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\homm3-clone.obj
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\map.obj
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\mapblock.obj
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\mapobject.obj
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\mobuilding.obj
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\mocastle.obj
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\mocreature.obj
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\model.obj
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\moempty.obj
@@ -21,11 +21,14 @@ c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\stdafx.
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\uibutton.obj
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\viewmanager.obj
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\aiplayer.obj
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\buildings.obj
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\camera.obj
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\combatlogic.obj
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\creature.obj
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\gamelogic.obj
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\hero.obj
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\homm3-clone.obj
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\inputmanager.obj
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\glmimg.obj
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\glmimg_devil.obj
 c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\debug\glmimg_jpg.obj

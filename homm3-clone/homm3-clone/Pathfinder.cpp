@@ -44,7 +44,8 @@ void Pathfinder::findPaths(intp origin, int maxDistance) {
 		intp current = bfsQueue.front();
 		bfsQueue.pop();
 
-		if (current != origin && (map->getObject(current)->isHolding() || map->isThreatened(current))) {
+		if (current != origin && (map->getObject(current)->isHolding() ||
+			map->isThreatened(current) || GameLogic::instance().tileHasHero(current))) {
 			continue;
 		}
 
@@ -74,6 +75,8 @@ void Pathfinder::findPaths(intp origin, int maxDistance) {
 	}
 	bfsQueue.push(origin);
 	backGhost[origin.x][origin.y] = intp(-1, -1); // to be able to find the origin even if using a wrong hero
+	reachableBuildings.clear();
+	reachableItems.clear();
 	while (!bfsQueue.empty()) {
 		intp current = bfsQueue.front();
 		bfsQueue.pop();
@@ -103,8 +106,8 @@ void Pathfinder::findPaths(intp origin, int maxDistance) {
 	}
 }
 
-vector<intp> Pathfinder::getPathTo(intp target, bool isGhost) {
-	vector<intp> path;
+std::vector<intp> Pathfinder::getPathTo(intp target, bool isGhost) {
+	std::vector<intp> path;
 	// if the target tile is not reachable
 	if (distGhost[target.x][target.y] == -1 || (!isGhost && distSolid[target.x][target.y] == -1)) {
 		return path; // empty
@@ -133,9 +136,9 @@ bool Pathfinder::isAccessible(intp location, bool isGhost) {
 	if (tempObject->isBlocking() && (!isGhost || (tempObject->objectType != ITEM && tempObject->objectType != CREATURE))) {
 		return false;
 	}
-	if (GameLogic::instance().tileHasHero(location) && !isGhost) {
+	/*if (GameLogic::instance().tileHasHero(location) && !isGhost) {
 		return false;
-	}
+	}*/
 
 	return true;
 }
@@ -181,7 +184,7 @@ int Pathfinder::countInvisibleAround(intp tile, int radius) {
 }
 
 bool Pathfinder::isBuilding(MapObject* object) {
-	if (object->objectType == MINE) {
+	if (object->objectType == MINE || object->objectType == CASTLE) {
 		return true;
 	}
 

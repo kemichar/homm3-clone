@@ -3,32 +3,30 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include <glm/glm.hpp>
+#include "Utility.h"
 #include "FactionMember.h"
-
-using namespace std;
-using namespace glm;
 
 /*
 	This class represents the creatures used in combat. For creature objects
-	visible on the map see Creature.
+	visible on the map see MOCreature.
 */
 class Creature : public FactionMember {
 
 public:
 	Creature();
-	Creature(string _name, int _count = 1, int _factionId = 0);
-	Creature(string _name, int _count, FactionMember* member);
-	Creature(string _name, string _infoString, int _count = 1, int _factionId = 0);
+	Creature(std::string _name, int _count = 1, int _factionId = 0);
+	Creature(std::string _name, int _count, FactionMember* member);
+	Creature(std::string _name, std::string _infoString, int _count = 1, int _factionId = 0);
 	Creature(Creature* _original, int _count = 1, int _factionId = 0);
 	
 	void refresh();
 	void takeDamageFrom(Creature *opponentStack);
 	void draw(float size);
+	float universalPower();
 
-	vector<string> getDescription();
+	std::vector<std::string> getDescription();
 
-	string name;
+	std::string name;
 	int count;
 	int level;
 	int baseDamageMin;
@@ -39,11 +37,13 @@ public:
 	int maxHealth;
 	int health; // health of the first creature on the stack
 	int experience;
-	string plural;
+	int growth;
+	int cost;
+	std::string plural;
 
-	vec2 combatPos;
+	intp combatPos;
 
 private:
-	string infoString;
-	vector<string> description;
+	std::string infoString;
+	std::vector<std::string> description;
 };

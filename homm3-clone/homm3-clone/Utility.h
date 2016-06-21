@@ -15,17 +15,18 @@
 #include <iostream>
 #include <map>
 
-using namespace glm;
-using namespace std;
-
 // A pair of ints.
 struct intp {
 	intp() : x(0), y(0) {}
 	intp(int _x, int _y) : x(_x), y(_y) {}
-	intp(vec2 _data) : x((int)_data.x), y((int)_data.y) {}
+	intp(glm::vec2 _data) : x((int)_data.x), y((int)_data.y) {}
 
 	intp operator+(const intp &a) const {
 		return intp(a.x + x, a.y + y);
+	}
+
+	intp operator-(const intp &a) const {
+		return intp(x - a.x, y - a.y);
 	}
 
 	bool operator==(const intp &a) const {
@@ -48,7 +49,7 @@ struct intp {
 struct floatp {
 	floatp() : x(0), y(0) {}
 	floatp(float _x, float _y) : x(_x), y(_y) {}
-	floatp(vec2 _data) : x((float)_data.x), y((float)_data.y) {}
+	floatp(glm::vec2 _data) : x((float)_data.x), y((float)_data.y) {}
 
 	floatp operator+(const floatp &a) const {
 		return floatp(a.x + x, a.y + y);
@@ -66,20 +67,41 @@ struct floatp {
 	float y;
 };
 
-inline vec2 randomUnit(){
-	vec2 ret = vec2(rand() - RAND_MAX / 2, rand() - RAND_MAX / 2);
+struct Rect {
+	Rect() : pos(floatp(0, 0)), dim(floatp(0, 0)) {}
+	Rect(floatp _pos, floatp _dim) : pos(_pos), dim(_dim) {}
+
+	bool contains(floatp point) {
+		return point.x >= pos.x && point.x < pos.x + dim.x
+			&& point.y >= pos.y && point.y <= pos.y + dim.y;
+	}
+
+	bool operator==(const Rect &a) const {
+		return (pos == a.pos && dim == a.dim);
+	}
+
+	bool operator!=(const Rect &a) const {
+		return !(pos == a.pos && dim == a.dim);
+	}
+
+	floatp pos;
+	floatp dim;
+};
+
+inline glm::vec2 randomUnit(){
+	glm::vec2 ret = glm::vec2(rand() - RAND_MAX / 2, rand() - RAND_MAX / 2);
 	return normalize(ret);
 }
 
-inline float angleBetween(vec3 x, vec3 y){
+inline float angleBetween(glm::vec3 x, glm::vec3 y){
 	return dot(normalize(x), normalize(y)) / 57.2957795131f;
 }
 
-inline vec3 axisBetween(vec3 x, vec3 y){
+inline glm::vec3 axisBetween(glm::vec3 x, glm::vec3 y){
 	return cross(normalize(x), normalize(y));
 }
 
-inline float manhattan(vec2 x, vec2 y) {
+inline float manhattan(glm::vec2 x, glm::vec2 y) {
 	return abs(x.x - y.x) + abs(x.y - y.y);
 }
 
@@ -87,7 +109,7 @@ inline float manhattan(intp x, intp y) {
 	return abs(x.x - y.x) + abs(x.y - y.y);
 }
 
-inline float euclid(vec2 x, vec2 y) {
+inline float euclid(glm::vec2 x, glm::vec2 y) {
 	return sqrt((x.x - y.x) * (x.x - y.x) + (x.y - y.y) * (x.y - y.y));
 }
 
@@ -119,19 +141,19 @@ inline int mmin(int x, int y) {
 	return x < y ? x : y;
 }
 
-inline vec3 clamp(vec3 l, vec3 r, vec3 x){
+inline glm::vec3 clamp(glm::vec3 l, glm::vec3 r, glm::vec3 x){
 	x.x = mmin(r.x, mmax(l.x, x.x));
 	x.y = mmin(r.y, mmax(l.y, x.y));
 	x.z = mmin(r.z, mmax(l.z, x.z));
 	return x;
 }
 
-inline bool rectContains(vec2 rectPoint, vec2 rectDim, vec2 point) {
+inline bool rectContains(glm::vec2 rectPoint, glm::vec2 rectDim, glm::vec2 point) {
 	return point.x >= rectPoint.x && point.x < rectPoint.x + rectDim.x
 		&& point.y >= rectPoint.y && point.y <= rectPoint.y + rectDim.y;
 }
 
-inline void drawText(void* font, string text) {
+inline void drawText(void* font, std::string text) {
 	for (int i = 0; i < (int)text.size(); i++) {
 		glutBitmapCharacter(font, text[i]);
 	}
@@ -141,44 +163,44 @@ inline double clamp(double l, double r, double x) {
 	return mmin(r, mmax(l, x));
 }
 
-inline vec2 lerp(vec2 fromPoint, vec2 toPoint, float progress){
+inline glm::vec2 lerp(glm::vec2 fromPoint, glm::vec2 toPoint, float progress){
 	return fromPoint + (toPoint - fromPoint) * progress;
 }
 
-inline vec2 coordsFromMap(vec2 mapCoords, double tileDimension) {
-	return vec2(mapCoords.x * tileDimension + tileDimension / 2, mapCoords.y * tileDimension + tileDimension / 2);
+inline glm::vec2 coordsFromMap(intp mapCoords, double tileDimension) {
+	return glm::vec2(mapCoords.x * tileDimension + tileDimension / 2, mapCoords.y * tileDimension + tileDimension / 2);
 }
 
 /*
 Intersection with the z = 0 plane.
 */
-inline vec3 lineXYPlaneIntersection(vec3 a, vec3 b) {
-	vec3 normal(0, 0, 1);
-	vec3 ba = b - a;
+inline glm::vec3 lineXYPlaneIntersection(glm::vec3 a, glm::vec3 b) {
+	glm::vec3 normal(0, 0, 1);
+	glm::vec3 ba = b - a;
 	float nDotA = dot(normal, a);
 	float nDotBA = dot(normal, ba);
 
 	return a + (-nDotA / nDotBA) * ba;
 }
 
-inline std::map<string, string> readListedFiles(string directory, string listFileName) {
+inline std::map<std::string, std::string> readListedFiles(std::string directory, std::string listFileName) {
 	if (directory[directory.size() - 1] != '/') {
 		directory += '/';
 	}
 
 	listFileName = directory + listFileName;
 
-	std::map<string, string> data;
+	std::map<std::string, std::string> data;
 
 	FILE *fileList = fopen(listFileName.c_str(), "r");
 	if (fileList != NULL) {
 		char fileName[50] = "";
 		while (fscanf(fileList, "%s", fileName) != EOF) {
-			string nameString(fileName);
+			std::string nameString(fileName);
 			FILE *file = fopen((directory + nameString).c_str(), "r");
 			if (file != NULL) {
-				ifstream t(file);
-				stringstream buffer;
+				std::ifstream t(file);
+				std::stringstream buffer;
 				buffer << t.rdbuf();
 				data[nameString.substr(0, nameString.find_last_of("."))] = buffer.str(); // be careful when there's no '.'
 				fclose(file);
@@ -190,15 +212,15 @@ inline std::map<string, string> readListedFiles(string directory, string listFil
 	return data;
 }
 
-inline vector<string> readFile(string fileName) {
-	vector<string> data;
+inline std::vector<std::string> readFile(std::string fileName) {
+	std::vector<std::string> data;
 
 	FILE *file = fopen(fileName.c_str(), "r");
 	if (file != NULL) {
-		ifstream t(file);
-		stringstream buffer;
+		std::ifstream t(file);
+		std::stringstream buffer;
 		buffer << t.rdbuf();
-		string line;
+		std::string line;
 		while (getline(buffer, line)) {
 			data.push_back(line);
 		}
@@ -206,17 +228,17 @@ inline vector<string> readFile(string fileName) {
 	}
 	else {
 		// DEBUG
-		cout << "Utility.h error: Couldn't open file " << fileName << endl;
+		std::cout << "Utility.h error: Couldn't open file " << fileName << std::endl;
 	}
 
 	return data;
 }
 
-inline vector<string> splitString(string line) {
-	vector<string> ret;
+inline std::vector<std::string> splitString(std::string line) {
+	std::vector<std::string> ret;
 
-	stringstream buffer(line);
-	string word;
+	std::stringstream buffer(line);
+	std::string word;
 	while (buffer.good()) {
 		buffer >> word;
 		ret.push_back(word);

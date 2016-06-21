@@ -6,5 +6,7 @@ defense 3
 speed 4
 maxHealth 10
 experience 10
+growth 9
+cost 100
 plural Archers
 canShoot true

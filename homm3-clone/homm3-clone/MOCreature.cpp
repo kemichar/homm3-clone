@@ -1,7 +1,7 @@
 #include "MOCreature.h"
 #include "GameLogic.h"
 
-MOCreature::MOCreature(intp _pos, string _creatureName, vector<int> _counts)
+MOCreature::MOCreature(intp _pos, std::string _creatureName, std::vector<int> _counts)
 	: MapObject(_pos) {
 	hero = new Hero(0, false);
 	for (int i = 0; i < (int)_counts.size() && i < HERO_UNIT_SLOTS; i++) {
@@ -11,7 +11,7 @@ MOCreature::MOCreature(intp _pos, string _creatureName, vector<int> _counts)
 	objectType = CREATURE;
 }
 
-MOCreature::MOCreature(intp _pos, string _creatureName, int _count)
+MOCreature::MOCreature(intp _pos, std::string _creatureName, int _count)
 	: MapObject(_pos) {
 	hero = new Hero(0, false);
 	hero->creatures[0] = new Creature(_creatureName, _count);
@@ -40,7 +40,7 @@ void MOCreature::interact() {
 	// TODO might change? interact from a distance?
 }
 
-void MOCreature::draw(float size) {
+void MOCreature::draw(float size, bool mapDependency) {
 	for (int i = 0; i < HERO_UNIT_SLOTS; i++) {
 		if (hero->creatures[i] != nullptr && hero->creatures[i]->count > 0) {
 			hero->creatures[i]->draw(size);

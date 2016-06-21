@@ -19,7 +19,7 @@ MOPath::MOPath(Map * map, intp _pos)
 
 // TEMP scribbling some paths
 
-void MOPath::draw(float size) {
+void MOPath::draw(float size, bool mapDependency) {
 	glDisable(GL_LIGHTING);
 	glColor3f(0.8, 0.8, 0.8);
 

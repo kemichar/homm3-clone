@@ -14,9 +14,10 @@ public:
 
 	virtual void interact() override = 0;
 
-	virtual void draw(float size) override;
+	virtual void draw(float size, bool mapDependency = true) override;
 
 protected:
 	floatp modelOffset;
+	floatp entranceAngleOffset;
 
 };

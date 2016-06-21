@@ -152,6 +152,7 @@
   <ItemGroup>
     <ClInclude Include="AIPlayer.h" />
     <ClInclude Include="BIT.h" />
+    <ClInclude Include="Buildings.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CombatLogic.h" />
     <ClInclude Include="CombatResult.h" />
@@ -163,10 +164,12 @@
     <ClInclude Include="FactionSetup.h" />
     <ClInclude Include="GameLogic.h" />
     <ClInclude Include="Hero.h" />
+    <ClInclude Include="InputManager.h" />
     <ClInclude Include="Map.h" />
     <ClInclude Include="MapBlock.h" />
     <ClInclude Include="MapObject.h" />
     <ClInclude Include="MOBuilding.h" />
+    <ClInclude Include="MOCastle.h" />
     <ClInclude Include="MOCreature.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="MOEmpty.h" />
@@ -184,21 +187,31 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="UIButton.h" />
+    <ClInclude Include="UIClickableContainer.h" />
+    <ClInclude Include="UICreatureContainerDouble.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="ViewManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AIPlayer.cpp" />
+    <ClCompile Include="BIT.cpp" />
+    <ClCompile Include="Buildings.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="CombatLogic.cpp" />
     <ClCompile Include="Creature.cpp" />
+    <ClCompile Include="Currency.cpp" />
+    <ClCompile Include="DebugParameters.cpp" />
+    <ClCompile Include="FactionMember.cpp" />
+    <ClCompile Include="FactionSetup.cpp" />
     <ClCompile Include="GameLogic.cpp" />
     <ClCompile Include="Hero.cpp" />
     <ClCompile Include="homm3-clone.cpp" />
+    <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="Map.cpp" />
     <ClCompile Include="MapBlock.cpp" />
     <ClCompile Include="MapObject.cpp" />
     <ClCompile Include="MOBuilding.cpp" />
+    <ClCompile Include="MOCastle.cpp" />
     <ClCompile Include="MOCreature.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="MOEmpty.cpp" />
@@ -221,6 +234,8 @@
     <ClCompile Include="Resources.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="UIButton.cpp" />
+    <ClCompile Include="UIClickableContainer.cpp" />
+    <ClCompile Include="UICreatureContainerDouble.cpp" />
     <ClCompile Include="ViewManager.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

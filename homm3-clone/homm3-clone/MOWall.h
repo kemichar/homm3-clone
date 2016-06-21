@@ -9,7 +9,7 @@ public:
 
 	bool isBlocking() override;
 
-	virtual void draw(float size) override;
+	virtual void draw(float size, bool mapDependency) override;
 
 	virtual void interact() override;
 

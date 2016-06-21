@@ -6,5 +6,7 @@ defense 7
 speed 5
 maxHealth 30
 experience 10
+growth 3
+cost 400
 plural Monks
 canShoot true

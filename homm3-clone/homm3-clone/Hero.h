@@ -1,9 +1,7 @@
 #pragma once
 
-#include <functional>
-#include "FactionMember.h"
 #include "Constants.h"
-#include "CombatResult.h"
+#include "FactionMember.h"
 #include "Creature.h"
 
 class Hero : public FactionMember {
@@ -14,9 +12,17 @@ public:
 
 	void* getCreature(int index);
 
+	void smartArmySetup(Hero * enemy);
+
+	int strongestStackIndex();
+
+	void stackArmyNeatly();
+
+	float totalUniversalPower();
+
 	int stackCount();
 
-	inline bool canMove(int distance);
+	bool canMove(int distance);
 
 	bool move(int distance);
 

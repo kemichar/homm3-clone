@@ -16,6 +16,8 @@ Creature::Creature(string _name, int _count, int _factionId) :
 	speed = original->speed;
 	maxHealth = original->maxHealth;
 	experience = original->experience;
+	growth = original->growth;
+	cost = original->cost;
 	plural = original->plural;
 }
 
@@ -68,6 +70,16 @@ Creature::Creature(string _name, string _infoString, int _count, int _factionId)
 			ss >> value;
 			experience = value;
 		}
+		else if (attribute == "growth") {
+			int value;
+			ss >> value;
+			growth = value;
+		}
+		else if (attribute == "cost") {
+			int value;
+			ss >> value;
+			cost = value;
+		}
 		else if (attribute == "plural") {
 			string value;
 			ss >> value;
@@ -91,6 +103,8 @@ Creature::Creature(Creature * _original, int _count, int _factionId) :
 	speed = _original->speed;
 	maxHealth = _original->maxHealth;
 	experience = _original->experience;
+	growth = _original->growth;
+	cost = _original->cost;
 	plural = _original->plural;
 }
 
@@ -107,8 +121,8 @@ void Creature::takeDamageFrom(Creature * opponentStack) {
 		report += to_string(opponentStack->count) + " " + opponentStack->plural + " attack, ";
 	}
 
-	float attackModifier = max(0, opponentStack->attack - defense) * 0.05f;
-	float defenseModifier = max(0, defense - opponentStack->attack) * 0.025f;
+	float attackModifier = mmax(0, opponentStack->attack - defense) * 0.05f;
+	float defenseModifier = mmax(0, defense - opponentStack->attack) * 0.025f;
 	float baseDamage =
 		rand() % (opponentStack->baseDamageMax - opponentStack->baseDamageMin + 1)
 		+ opponentStack->baseDamageMin;
@@ -130,11 +144,18 @@ void Creature::takeDamageFrom(Creature * opponentStack) {
 }
 
 void Creature::draw(float size) {
-	glPushMatrix();
-	vec3 tempColor = COLORS[factionId];
-	glColor3f(tempColor.r, tempColor.g, tempColor.b);
-	glutWireCone(size / 3, size, 10, 10);
-	glPopMatrix();
+	glColor3f(COLORS[factionId].r, COLORS[factionId].g, COLORS[factionId].b);
+
+	if (Resources::modelData.find(this->name) != Resources::modelData.end()) {
+		glmDraw(Resources::modelData[this->name], GLM_SMOOTH | GLM_COLOR, 1);
+	}
+	else {
+		glutWireCone(size / 3, size, 10, 10);
+	}
+}
+
+float Creature::universalPower() {
+	return (baseDamageMin + baseDamageMax) / 2.f * count;
 }
 
 vector<string> Creature::getDescription() {

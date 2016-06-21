@@ -1,1 +1,2 @@
-tree quakingAspen.obj
+tree Tree.obj
+castle Castle.obj

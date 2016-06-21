@@ -468,7 +468,7 @@ glmReadMTL(GLMmodel* model, char* name)
 	    break;
         case 'm':
             /* texture map */
-            tex_filename = malloc(FILENAME_MAX);
+            tex_filename = (char*)malloc(FILENAME_MAX);
             fgets(tex_filename, FILENAME_MAX, file);
             t_filename = __glmStrStrip(tex_filename);
             free(tex_filename);
@@ -1636,9 +1636,9 @@ glmReadOBJ(const char* filename)
     glmFacetNormals(model);
 
     /* verify the indices */
-	for (i = 0; i < model->numtriangles; i++) {
+	for (i = 0; i < (int)model->numtriangles; i++) {
 		if (T(i).findex != -1)
-			if (T(i).findex <= 0 || T(i).findex > model->numfacetnorms)
+			if (T(i).findex <= 0 || T(i).findex > (int)model->numfacetnorms)
 				__glmFatalError("facet index for triangle %d out of bounds (%d > %d)\n", i, T(i).findex, model->numfacetnorms);
 		for (j = 0; j < 3; j++) {
 			if (T(i).nindices[j] != -1)
@@ -1862,22 +1862,22 @@ glmWriteOBJ(GLMmodel* model, char* filename, GLuint mode)
 }
 
 /* glmDraw: Renders the model to the current OpenGL context using the
- * mode specified.
- *
- * model - initialized GLMmodel structure
- * mode  - a bitwise OR of values describing what is to be rendered.
- *             GLM_NONE     -  render with only vertices
- *             GLM_FLAT     -  render with facet normals
- *             GLM_SMOOTH   -  render with vertex normals
- *             GLM_TEXTURE  -  render with texture coords
- *             GLM_COLOR    -  render with colors (color material)
- *             GLM_MATERIAL -  render with materials
- *             GLM_COLOR and GLM_MATERIAL should not both be specified.  
- *             GLM_FLAT and GLM_SMOOTH should not both be specified.  
- */
-GLvoid glmDraw(GLMmodel* model, GLuint mode) {
+* mode specified.
+*
+* model - initialized GLMmodel structure
+* mode  - a bitwise OR of values describing what is to be rendered.
+*             GLM_NONE     -  render with only vertices
+*             GLM_FLAT     -  render with facet normals
+*             GLM_SMOOTH   -  render with vertex normals
+*             GLM_TEXTURE  -  render with texture coords
+*             GLM_COLOR    -  render with colors (color material)
+*             GLM_MATERIAL -  render with materials
+*             GLM_COLOR and GLM_MATERIAL should not both be specified.
+*             GLM_FLAT and GLM_SMOOTH should not both be specified.
+*/
+GLvoid glmDraw(GLMmodel* model, GLuint mode, int usePreparedColor) {
 	GLMmaterial* material = NULL;
-    GLMtriangle* triangle;
+	GLMtriangle* triangle;
 
 	if (mode & GLM_COLOR) {
 		glEnable(GL_COLOR_MATERIAL);
@@ -1896,9 +1896,11 @@ GLvoid glmDraw(GLMmodel* model, GLuint mode) {
 			glMaterialf(GL_FRONT_AND_BACK, GL_SHININESS, material->shininess);
 		}
 		else {
-			glColor3fv(material->diffuse);
+			if (usePreparedColor == 0) {
+				glColor3fv(material->diffuse);
+			}
 		}
-		
+
 		glBegin(GL_TRIANGLES);
 		for (int i = 0; i < group->numtriangles; i++) {
 			triangle = &T(group->triangles[i]);
@@ -1976,7 +1978,7 @@ glmList(GLMmodel* model, GLuint mode)
     
     list = glGenLists(1);
     glNewList(list, GL_COMPILE);
-    glmDraw(model, mode);
+    glmDraw(model, mode, 0);
     glEndList();
     
     return list;

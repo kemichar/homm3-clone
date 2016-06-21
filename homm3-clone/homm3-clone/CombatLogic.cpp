@@ -1,8 +1,10 @@
 #include "CombatLogic.h"
 #include <iostream>
+#include <glm/glm.hpp>
 #include "Utility.h"
 #include "FactionSetup.h"
 #include "GameLogic.h"
+#include "ViewManager.h"
 
 CombatLogic::CombatLogic() {
 	combatActive = false;
@@ -18,9 +20,9 @@ CombatLogic& CombatLogic::instance() {
 }
 
 
-bool CombatLogic::isMoveValid(vec2 moveTarget) {
+bool CombatLogic::isMoveValid(intp moveTarget) {
 	bool valid = false;
-	for (vec2 validPos : validMoves) {
+	for (intp validPos : validMoves) {
 		if (validPos == moveTarget) {
 			valid = true;
 			break;
@@ -34,18 +36,18 @@ void CombatLogic::calcValidMoves() {
 
 	bool bio[COMBAT_COLS][COMBAT_ROWS];
 	memset(bio, 0, sizeof bio);
-	vec2 start = creatures[currentCreature]->combatPos;
+	intp start = creatures[currentCreature]->combatPos;
 	bio[(int)start.x][(int)start.y] = true;
 
-	queue<vec3> bfsq;
-	bfsq.push(vec3(start.x, start.y, 0));
+	std::queue<glm::vec3> bfsq;
+	bfsq.push(glm::vec3(start.x, start.y, 0));
 	while (!bfsq.empty()) {
-		vec3 curr = bfsq.front();
+		glm::vec3 curr = bfsq.front();
 		bfsq.pop();
 		validMoves.push_back(vec2(curr.x, curr.y));
 		if (curr.z < creatures[currentCreature]->speed) {
 			for (int k = 0; k < 8; k++) {
-				vec3 next(curr.x + COMBAT_MOVE_DIR[k].x, curr.y + COMBAT_MOVE_DIR[k].y, curr.z + 1);
+				glm::vec3 next(curr.x + COMBAT_MOVE_DIR[k].x, curr.y + COMBAT_MOVE_DIR[k].y, curr.z + 1);
 				if (next.x < 0 || next.x >= COMBAT_COLS || next.y < 0 ||
 					next.y >= COMBAT_ROWS || bio[(int)next.x][(int)next.y]) {
 					continue;
@@ -69,6 +71,8 @@ void CombatLogic::calcValidMoves() {
 }
 
 void CombatLogic::setupCombat(MapObject * _attackerObject, MapObject * _defenderObject) {
+	ViewManager::instance().isActive[CamId::COMBAT] = true;
+
 	attackerObject = _attackerObject;
 	defenderObject = _defenderObject;
 	attacker = _attackerObject->hero;
@@ -76,9 +80,17 @@ void CombatLogic::setupCombat(MapObject * _attackerObject, MapObject * _defender
 	attackerFaction = attacker->getFactionId();
 	defenderFaction = defender->getFactionId();
 
-	creatures.clear();
+	// rearrange the troops if the defender is faction 0 (map AI)
+	if (defender->getFactionId() == 0) {
+		defender->smartArmySetup(attacker);
+	}
+	// TEMP if attacker is AI rearrange the troops
+	if (FactionSetup::instance().isAI[attacker->getFactionId()]) {
+		attacker->smartArmySetup(defender);
+	}
 
-	// retrieve the creatures involved in combat
+	// retrieve the creatures involved in combat and set their positions
+	creatures.clear();
 	attackerStacks = attacker->stackCount();
 	int posIndex = 0;
 	for (Creature* creature: attacker->creatures) {
@@ -121,7 +133,7 @@ void CombatLogic::setupCombat(MapObject * _attackerObject, MapObject * _defender
 	roundCount = 0;
 	combatActive = true;
 
-	// check if someone started the fight without any troops (autoloss); shouldn't ever happen
+	// check if someone started the fight without any troops (autoloss)
 	if (defenderStacks == 0) {
 		endCombat(attackerFaction);
 	}
@@ -129,11 +141,27 @@ void CombatLogic::setupCombat(MapObject * _attackerObject, MapObject * _defender
 		endCombat(defenderFaction);
 	}
 	else {
-		cout << "Combat: Starting with creature (" << creatures[currentCreature]->combatPos.x << ", " <<
-			creatures[currentCreature]->combatPos.y << ") faction " << creatures[currentCreature]->getFactionId() << endl;
+		std::cout << "Combat: Starting with creature (" << creatures[currentCreature]->combatPos.x << ", " <<
+			creatures[currentCreature]->combatPos.y << ") faction " << creatures[currentCreature]->getFactionId() << std::endl;
 
 		if (FactionSetup::instance().isAI[creatures[currentCreature]->getFactionId()]) {
 			simpleCombatAI();
+		}
+		// TEMP thread sleep solution, reconsider if more threads are added
+		else if (std::this_thread::get_id() == GameLogic::instance().aiThread.get_id()) {
+			threadSleep();
+		}
+	}
+}
+
+void CombatLogic::threadSleep() {
+	float sleepTime = 0; // DEBUG not total time
+	while (combatActive) {
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+		sleepTime += 0.5f;
+		if (sleepTime > 5) {
+			sleepTime = 0;
+			printf("AI thread waiting for combat to end...\n");
 		}
 	}
 }
@@ -153,36 +181,40 @@ void CombatLogic::nextCreature() {
 	lastActive[currentCreature] = roundCount;
 	calcValidMoves();
 
-	cout << "Combat: Next creature (" << creatures[currentCreature]->combatPos.x << ", " <<
+	std::cout << "	Next creature (" << creatures[currentCreature]->combatPos.x << ", " <<
 		creatures[currentCreature]->combatPos.y << ") f: " << creatures[currentCreature]->getFactionId() << " c: "
-		<< creatures[currentCreature]->count << endl;
+		<< creatures[currentCreature]->count << std::endl;
 
 	if (FactionSetup::instance().isAI[creatures[currentCreature]->getFactionId()]) {
 		simpleCombatAI();
 	}
+	// TEMP thread sleep solution
+	else if (std::this_thread::get_id() == GameLogic::instance().aiThread.get_id()) {
+		threadSleep();
+	}
 }
 
-void CombatLogic::move(vec2 targetPos, int direction) {
+void CombatLogic::move(intp targetPos, int direction) {
 	move(targetPos, COMBAT_ATTACK_DIR[direction]);
 }
 
-void CombatLogic::move(vec2 targetPos, vec2 direction) {
+void CombatLogic::move(intp targetPos, intp direction) {
 	if (!isMoveValid(targetPos)) {
 		return;
 	}
 
 	creatures[currentCreature]->combatPos = targetPos;
-	vec2 lookAt = targetPos + direction;
+	intp lookAt = targetPos + direction;
 	for (int i = 0; i < (int)creatures.size(); i++) {
 		if (creatures[i] != nullptr && creatures[i]->count > 0 && creatures[i]->combatPos == lookAt &&
 			creatures[i]->getFactionId() != creatures[currentCreature]->getFactionId()) {
 			creatures[i]->takeDamageFrom(creatures[currentCreature]);
-			cout << "Combat: " << creatures[currentCreature]->plural << " attacked "<< creatures[i]->plural << ". " << creatures[i]->count << " survived the attack." << endl;
+			std::cout << "	" << creatures[currentCreature]->plural << " attacked "<< creatures[i]->plural << ". " << creatures[i]->count << " survived the attack." << std::endl;
 
 			if (creatures[i]->count <= 0) {
 				if (creatures[i]->getFactionId() == attackerFaction) {
 					attackerStacks--;
-					cout << "Combat: Attacker lost a stack, stacks remaining: " << attackerStacks << endl;
+					std::cout << "	Attacker lost a stack, stacks remaining: " << attackerStacks << std::endl;
 					if (attackerStacks <= 0) {
 						endCombat(defenderFaction);
 						return;
@@ -190,7 +222,7 @@ void CombatLogic::move(vec2 targetPos, vec2 direction) {
 				}
 				else {
 					defenderStacks--;
-					cout << "Combat: Defender lost a stack, stacks remaining: " << defenderStacks << endl;
+					std::cout << "	Defender lost a stack, stacks remaining: " << defenderStacks << std::endl;
 					if (defenderStacks <= 0) {
 						endCombat(attackerFaction);
 						return;
@@ -206,12 +238,14 @@ void CombatLogic::move(vec2 targetPos, vec2 direction) {
 }
 
 void CombatLogic::endCombat(int winnerFaction) {
-	cout << "Combat: Fight over, faction " << winnerFaction << " won." << endl;
-	combatActive = false;
-	creatures.resize(0);
+	ViewManager::instance().isActive[CamId::COMBAT] = false;
+	std::cout << "	Combat over, faction " << winnerFaction << " won." << std::endl;
 
 	if (winnerFaction == attackerFaction) {
 		if (attacker->isReal) {
+			if (!FactionSetup::instance().isAI[attacker->getFactionId()]) {
+				GameLogic::instance().getCurrentPlayer()->pf.findPaths(attackerObject->pos);
+			}
 			attacker->experience += attackerPotentialReward; // TODO add reward for hero kills and other non-experience rewards
 		}
 		if (defender->isReal) {
@@ -233,30 +267,19 @@ void CombatLogic::endCombat(int winnerFaction) {
 		}
 	}
 
-	/* old notification code, maybe reimplement?
-	CombatResult result(
-	attackerFaction,
-	defenderFaction,
-	winnerFaction,
-	(winnerFaction == attackerFaction) ?
-	attackerPotentialReward : defenderPotentialReward
-	);*/
-	/*attacker->onCombatEnd(result);
-	defender->onCombatEnd(result);*/
+	combatActive = false;
 }
 
 void CombatLogic::simpleCombatAI() {
-	printf("Combat: AI's combat turn\n");
-
 	Creature* currCreature = getActiveCreature();
-	vec2 currPos = currCreature->combatPos;
+	intp currPos = currCreature->combatPos;
 	float bestDist = oo;
 	int bestMove = 0;
 	for (int i = 0; i < (int)creatures.size(); i++) {
 		if (creatures[i]->getFactionId() != currCreature->getFactionId()  && creatures[i]->count > 0) {
-			vec2 enemyPos = creatures[i]->combatPos;
+			intp enemyPos = creatures[i]->combatPos;
 			for (int j = 0; j < (int)validMoves.size(); j++) {
-				vec2 nextPos = validMoves[j];
+				intp nextPos = validMoves[j];
 
 				// TODO ranged
 				if (abs(nextPos.x - enemyPos.x) <= 1 + eps && abs(nextPos.y - enemyPos.y) <= 1 + eps) {
@@ -283,6 +306,10 @@ Creature * CombatLogic::getActiveCreature() {
 
 int CombatLogic::getActiveFaction() {
 	return creatures[currentCreature]->getFactionId();
+}
+
+bool CombatLogic::isAiActive() {
+	return FactionSetup::instance().isAI[getActiveFaction()];
 }
 
 /*

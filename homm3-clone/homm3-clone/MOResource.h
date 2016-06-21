@@ -9,7 +9,7 @@ public:
 	MOResource(Resource _type, intp _pos);
 	MOResource(intp _pos);
 
-	void draw(float size) override;
+	void draw(float size, bool mapDependency) override;
 	void interact() override;
 
 	vec3 tempColor;

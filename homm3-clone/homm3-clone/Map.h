@@ -1,10 +1,10 @@
 #pragma once
 
-#include <ctime>
+#include <vector>
 #include "Constants.h"
-#include "MapObject.h"
 #include "Utility.h"
 #include "BIT.h"
+#include "MapObject.h"
 
 class Map {
 
@@ -23,7 +23,7 @@ public:
 	MapObject* getFirstThreat(intp location);
 	bool isThreatened(intp location);
 
-	vector<intp> threats[MAP_MAX_COLS][MAP_MAX_ROWS];
+	std::vector<intp> threats[MAP_MAX_COLS][MAP_MAX_ROWS];
 
 	// TODO move to private, just debugging here
 	BIT* dataTree;
@@ -43,10 +43,10 @@ private:
 	int zoneStartingFaction[MGEN_ZONE_LIMIT];
 
 	// map generation data
-	vector<intp> zoneOrigins;
-	vector<float> zoneRadius;
-	vector<intp> boundaries[MGEN_ZONE_LIMIT][MGEN_ZONE_LIMIT];
-	vector<int> adjZones[MGEN_ZONE_LIMIT];
+	std::vector<intp> zoneOrigins;
+	std::vector<float> zoneRadius;
+	std::vector<intp> boundaries[MGEN_ZONE_LIMIT][MGEN_ZONE_LIMIT];
+	std::vector<int> adjZones[MGEN_ZONE_LIMIT];
 
 	// tile zone identifiers; if zoneId >= zones denotes a boundary tile
 	int zoneId[MAP_MAX_COLS][MAP_MAX_ROWS];

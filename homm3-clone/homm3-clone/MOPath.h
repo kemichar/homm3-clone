@@ -9,7 +9,7 @@ public:
 	MOPath(Map* map, intp _pos);
 
 	// TEMP scribbling some paths
-	virtual void draw(float size);
+	virtual void draw(float size, bool mapDependency);
 
 private:
 	int tempShape; // left, down, right, up

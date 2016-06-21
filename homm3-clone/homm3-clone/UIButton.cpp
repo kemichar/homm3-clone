@@ -1,4 +1,16 @@
 #include "UIButton.h"
+#include <stdlib.h>
+#include <GL/glut.h>
+#include "GameLogic.h"
+#include "Utility.h"
+
+UIButton::UIButton(vec2 _dimension, std::string _text, actionFunc _action) :
+	dimension(_dimension), text(_text), action(_action) {
+}
+
+vec2 UIButton::getDimension() {
+	return dimension;
+}
 
 void UIButton::activate() {
 	((GameLogic::instance().*action))();

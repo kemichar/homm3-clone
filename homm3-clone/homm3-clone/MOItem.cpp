@@ -18,7 +18,7 @@ void MOItem::interact() {
 	GameLogic::instance().map->removeObject(pos);
 }
 
-void MOItem::draw(float size) {
+void MOItem::draw(float size, bool mapDependency) {
 	glColor3f(0.2, 0.2, 0.6);
 	glutSolidSphere(size / 8, 20, 20);
 }

@@ -6,7 +6,7 @@ Camera::Camera() {
 	unitCols = 1;
 }
 
-Camera::Camera(float * _offset, vec3 _clearColor, vec3 _pos, vec3 _speed,
+Camera::Camera(float * _offset, glm::vec3 _clearColor, glm::vec3 _pos, glm::vec3 _speed,
 	float _fovFactor, float _unit, int _unitRows, int _unitCols)
 	: clearColor(_clearColor), pos(_pos), speed(_speed), fovFactor(_fovFactor),
 	unit(_unit), unitRows(_unitRows), unitCols(_unitCols) {
@@ -78,9 +78,9 @@ void Camera::activateView(Mode viewMode, bool clear) {
 	glViewport(viewport[0], viewport[1], viewport[2], viewport[3]);
 }
 
-vec3 Camera::viewToWorldPoint(int x, int y, Mode viewMode) {
+glm::vec3 Camera::viewToWorldPoint(int x, int y, Mode viewMode) {
 	if (viewMode == ORTHO2D) {
-		return vec3(x, y, 0);
+		return glm::vec3(x, y, 0);
 	}
 	else {
 		x += viewport[0];
@@ -91,28 +91,28 @@ vec3 Camera::viewToWorldPoint(int x, int y, Mode viewMode) {
 		double farX, farY, farZ;
 		gluUnProject(x, y, 1, getModelview(viewMode), getProjection(viewMode), getViewport(), &farX, &farY, &farZ);
 
-		return lineXYPlaneIntersection(vec3(closeX, closeY, closeZ), vec3(farX, farY, farZ));
+		return lineXYPlaneIntersection(glm::vec3(closeX, closeY, closeZ), glm::vec3(farX, farY, farZ));
 	}
 }
 
-vec2 Camera::worldToViewPoint(vec3 pos, Mode viewMode) {
+glm::vec2 Camera::worldToViewPoint(glm::vec3 pos, Mode viewMode) {
 	if (viewMode == ORTHO2D) {
-		return vec2(pos.x, pos.y);
+		return glm::vec2(pos.x, pos.y);
 	}
 	else {
 		double screenX = 0, screenY = 0, screenZ = 0;
 		gluProject(pos.x, pos.y, pos.z, getModelview(viewMode), getProjection(viewMode), getViewport(),
 			&screenX, &screenY, &screenZ);
-		return vec2(screenX - viewport[0], screenY - viewport[1]);
+		return glm::vec2(screenX - viewport[0], screenY - viewport[1]);
 	}
 }
 
-void Camera::addRotation(vec4 rotation) {
+void Camera::addRotation(glm::vec4 rotation) {
 	rotations.push_back(rotation);
 }
 
 void Camera::rotate() {
-	for (vec4 rotation : rotations) {
+	for (glm::vec4 rotation : rotations) {
 		glRotatef(rotation.x, rotation.y, rotation.z, rotation.w);
 	}
 }

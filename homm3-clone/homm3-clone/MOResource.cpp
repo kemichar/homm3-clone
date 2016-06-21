@@ -17,7 +17,13 @@ void MOResource::interact() {
 	GameLogic::instance().map->removeObject(pos);
 }
 
-void MOResource::draw(float size) {
-	glColor3f(tempColor.r, tempColor.g, tempColor.b);
-	glutSolidCube(size / 6);
+void MOResource::draw(float size, bool mapDependency) {
+	if (model == nullptr) {
+		glColor3f(tempColor.r, tempColor.g, tempColor.b);
+		glutSolidCube(size / 6);
+	}
+	else {
+		glColor3f(tempColor.r, tempColor.g, tempColor.b);
+		MapObject::draw(size);
+	}
 }
