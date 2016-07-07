@@ -64,6 +64,7 @@ public:
 	std::vector<intp> buildingsControlled;
 
 	Pathfinder pf;
+	bool isEliminated;
 
 protected:
 	// the history of dead / deleted heroes

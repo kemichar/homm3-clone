@@ -1,0 +1,4 @@
+seed 1465428796
+zones 5
+players 3
+aiplayers 2

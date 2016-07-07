@@ -189,6 +189,7 @@
     <ClInclude Include="UIButton.h" />
     <ClInclude Include="UIClickableContainer.h" />
     <ClInclude Include="UICreatureContainerDouble.h" />
+    <ClInclude Include="TopMenu.h" />
     <ClInclude Include="Utility.h" />
     <ClInclude Include="ViewManager.h" />
   </ItemGroup>
@@ -233,6 +234,7 @@
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Resources.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="TopMenu.cpp" />
     <ClCompile Include="UIButton.cpp" />
     <ClCompile Include="UIClickableContainer.cpp" />
     <ClCompile Include="UICreatureContainerDouble.cpp" />

@@ -100,13 +100,18 @@ void myIdle() {
 				viewManager.mapCamera.pos.y = newY;
 			}
 		}
-		viewManager.mapCamera.pos.z =
-			clamp(ZOOM_MIN, ZOOM_MAX, viewManager.mapCamera.pos.z + viewManager.mapCamera.speed.z * elapsed * 0.004);
+		viewManager.mapCamera.pos.z += viewManager.mapCamera.speed.z * elapsed * 0.004;
+		if (!debugFreeCamera) {
+			viewManager.mapCamera.pos.z =
+				clamp(ZOOM_MIN, ZOOM_MAX, viewManager.mapCamera.pos.z);
+		}
 
 		// update the hero movement animation
 		if (~viewManager.heroMoving) {
 			viewManager.movingProgress += viewManager.movingSpeed * elapsed;
 		}
+
+		viewManager.update(elapsed);
 
 		// display the scene
 		myDisplay();
@@ -125,10 +130,17 @@ void myKeyboardUp(unsigned char key, int x, int y);
 void loadTexture(string texturePath, GLuint &saveId);
 
 int main(int argc, char ** argv) {
-	//unsigned int seed = time(NULL);
-	//srand(seed);
-	srand(1465428796);
-	//printf("%d\n", seed);
+	Resources::loadConfig();
+
+	unsigned int seed = 0;
+	if (Resources::configData.find("seed") != Resources::configData.end()) {
+		seed = Resources::configData["seed"];
+	}
+	else {
+		seed = time(NULL);
+	}
+	srand(seed);
+	printf("Using seed: %d\n", seed);
 
 	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(windowWidth, windowHeight);
@@ -177,7 +189,7 @@ int main(int argc, char ** argv) {
 	loadTexture(INPUT_COMBAT_BACKGROUND_TEXTURE, viewManager.combatBackgroundTexture);
 
 	gameLogic.map = new Map(gameLogic.rowCount, gameLogic.colCount);
-	gameLogic.map->testFillMap();
+	gameLogic.map->testFillMap(Resources::configData["zones"]);
 	viewManager.mapCamera.pos = glm::vec3(viewManager.mapUnit * gameLogic.colCount / 2, viewManager.mapUnit * gameLogic.rowCount / 2, 1);
 	// TEMP TODO change the y offset
 	viewManager.combatCamera.pos =
@@ -185,31 +197,18 @@ int main(int argc, char ** argv) {
 			COMBAT_ROWS * viewManager.combatUnit / 2.f - viewManager.combatUnit * 2, 1);
 	viewManager.minimapCamera.setGrid(intp(gameLogic.colCount, gameLogic.rowCount));
 
-	Player* player1 = gameLogic.addPlayer(false);
-	player1->addNewHero();
-	player1->getCurrentHero()->hero->creatures[3] = new Creature("Swordsman", 5, player1);
-	player1->addNewHero();
-	player1->setNextHero();
-	player1->getCurrentHero()->hero->creatures[0] = new Creature("Swordsman", 15, player1);
-	player1->getCurrentHero()->hero->creatures[3] = new Creature("Swordsman", 5, player1);
-
-	Player* player2 = gameLogic.addPlayer(true);
-	player2->addNewHero();
-	player2->getCurrentHero()->hero->creatures[1] = new Creature("Griffin", 6, player2);
-	player2->getCurrentHero()->hero->creatures[2] = new Creature("Swordsman", 10, player2);
-	player2->addNewHero();
-	player2->setNextHero();
-	player2->getCurrentHero()->hero->creatures[3] = new Creature("Griffin", 15, player2);
-	player2->getCurrentHero()->hero->creatures[4] = new Creature("Swordsman", 10, player2);
-
-	/*Player* player3 = gameLogic.addPlayer(true);
-	player3->addNewHero();
-	player3->getCurrentHero()->hero->creatures[1] = new Creature("Griffin", 6, player3);
-	player3->getCurrentHero()->hero->creatures[2] = new Creature("Swordsman", 10, player3);
-	player3->addNewHero();
-	player3->setNextHero();
-	player3->getCurrentHero()->hero->creatures[3] = new Creature("Griffin", 15, player3);
-	player3->getCurrentHero()->hero->creatures[4] = new Creature("Swordsman", 10, player3);*/
+	// add the set number of players TEMP and give them heroes with initial armies
+	int playerCount = Resources::configData["players"];
+	int playerAi = Resources::configData["aiplayers"];
+	for (int i = 0; i < playerCount; i++) {
+		Player* player = gameLogic.addPlayer(playerAi & (1 << i));
+		player->addNewHero();
+		player->getCurrentHero()->hero->creatures[3] = new Creature("Swordsman", 5, player);
+		player->addNewHero();
+		player->setNextHero();
+		player->getCurrentHero()->hero->creatures[0] = new Creature("Swordsman", 15, player);
+		player->getCurrentHero()->hero->creatures[3] = new Creature("Swordsman", 5, player);
+	}
 
 	gameLogic.aiThread = std::thread(&GameLogic::aiThreadJob, &gameLogic);
 	gameLogic.startGame();
@@ -232,6 +231,7 @@ void myReshape(int width, int height) {
 	viewManager.modelCamera.windowResized(width, height);
 	viewManager.combatCamera.windowResized(width, height);
 	viewManager.buildingCamera.windowResized(width, height);
+	viewManager.totalCamera.windowResized(width, height);
 	for (int i = 0; i < HERO_UNIT_SLOTS; i++) {
 		viewManager.troopCamera[i].windowResized(width, height);
 	}

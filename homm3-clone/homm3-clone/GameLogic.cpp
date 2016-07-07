@@ -3,11 +3,13 @@
 #include "ViewManager.h"
 #include "AIPlayer.h"
 #include "FactionSetup.h"
+#include "DebugParameters.h"
 
 GameLogic::GameLogic() {
 	currentPlayer = 0;
 	turnCount = 0;
 	dayCount = 0;
+	playersEliminated = 0;
 
 	rowCount = 100;
 	colCount = 100;
@@ -38,7 +40,7 @@ void GameLogic::startGame() {
 	players[currentPlayer]->refresh();
 
 	MOHero* currentHeroObject = players[currentPlayer]->getCurrentHero();
-	if (currentHeroObject != nullptr) {
+	if (currentHeroObject != nullptr && debugCameraAutoFocus) {
 		ViewManager::instance().mapCameraLookAt(currentHeroObject->pos);
 	}
 
@@ -53,24 +55,47 @@ void GameLogic::endTurn() {
 
 	// archive dead heroes
 	for (Player* player : players) {
-		for (int i = 0; i < (int)player->heroObjects.size(); ) {
-			if (player->heroObjects[i]->hero->isDead) {
-				player->archiveHero(i);
-			}
-			else {
-				i++;
+		if (!player->isEliminated) {
+			for (int i = 0; i < (int)player->heroObjects.size(); ) {
+				if (player->heroObjects[i]->hero->isDead) {
+					player->archiveHero(i);
+				}
+				else {
+					i++;
+				}
 			}
 		}
 	}
 
 	// update building ownership
 	for (Player* player : players) {
-		for (int i = 0; i < (int)player->buildingsControlled.size(); ) {
-			if (map->getObject(player->buildingsControlled[i]) == nullptr) {
-				player->buildingsControlled.erase(player->buildingsControlled.begin() + i);
+		if (!player->isEliminated) {
+			for (int i = 0; i < (int)player->buildingsControlled.size(); ) {
+				if (map->getObject(player->buildingsControlled[i]) == nullptr) {
+					player->buildingsControlled.erase(player->buildingsControlled.begin() + i);
+				}
+				else {
+					i++;
+				}
 			}
-			else {
-				i++;
+		}
+	}
+
+	// remove eliminated players
+	for (Player* player : players) {
+		if (!player->isEliminated) {
+			if (player->heroObjects.empty()) {
+				bool hasCastle = false;
+				for (intp pos : player->buildingsControlled) {
+					MapObject* object = map->getObject(pos);
+					if (object != nullptr && object->objectType == MOType::CASTLE) {
+						hasCastle = true;
+						break;
+					}
+				}
+				if (!hasCastle) {
+					player->isEliminated = true;
+				}
 			}
 		}
 	}
@@ -78,19 +103,26 @@ void GameLogic::endTurn() {
 	turnCount++;
 	printf(".. turn %d finished ..\n", turnCount);
 
-	currentPlayer = (currentPlayer + 1) % players.size();
-	if (currentPlayer == 0) {
-		dayCount++;
-		printf(".. day %d finished ..\n", dayCount);
-		// weekly refresh is on Mondays
-		if (dayCount % 7 == 0) {
-			weeklyRefresh();
+	do {
+		currentPlayer = (currentPlayer + 1) % players.size();
+		if (currentPlayer == 0) {
+			dayCount++;
+			printf(".. day %d finished ..\n", dayCount);
+			// weekly refresh is on Mondays
+			if (dayCount % 7 == 0) {
+				weeklyRefresh();
+			}
 		}
+	} while (players[currentPlayer]->isEliminated);
+
+	if (playersEliminated == players.size() - 1) {
+		quitGame();
 	}
+
 	players[currentPlayer]->refresh();
 	
 	MOHero* currentHeroObject = players[currentPlayer]->getCurrentHero();
-	if (currentHeroObject != nullptr) {
+	if (currentHeroObject != nullptr && debugCameraAutoFocus) {
 		ViewManager::instance().mapCameraLookAt(currentHeroObject->pos);
 	}
 	

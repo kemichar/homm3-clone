@@ -21,14 +21,27 @@ struct BuildingSlot {
 	int type;
 };
 
+struct Tooltip {
+	Tooltip();
+
+	intp pos;
+	intp dim;
+	std::vector<std::string> description;
+	Camera* refCamera;
+	int duration;
+};
+
 class ViewManager {
 
 public:
+	void update(int elapsedTime);
+
 	void mapCameraLookAt(intp objectPos);
 
 	void displayActiveWindows();
 	void displayTexture(GLuint id, float width, float height, vec3 colorMult = vec3(1, 1, 1));
 	void showBuilding(intp location);
+	void showTooltip(intp pos, std::vector<std::string> description, Camera* refCamera, int milliseconds = 500);
 
 	bool isActive[_CAMID_END];
 	Camera mapCamera;
@@ -40,6 +53,7 @@ public:
 	Camera promptCamera;
 	Camera combatCamera;
 	Camera buildingCamera;
+	Camera totalCamera;
 
 	float INIT_MAP_CAMERA[4] = { 0, 0, 8.f / 10, 29.f / 30 };
 	float INIT_TOPMENU_CAMERA[4] = { 0, 29.f / 30, 8.f / 10, 1 };
@@ -51,6 +65,7 @@ public:
 	float INIT_PROMPT_CAMERA[4] = { 3.f / 10, 9.f / 20, 5.f / 10, 11.f / 20 };
 	float INIT_COMBAT_CAMERA[4] = { 0.25f, 0.25f, 0.75f, 0.75f };
 	float INIT_BUILDING_CAMERA[4] = { 0.25f, 0.25f, 0.75f, 0.75f };
+	float INIT_TOTAL_CAMERA[4] = { 0, 0, 1, 1 };
 
 	float mapUnit;
 	float combatUnit;
@@ -62,15 +77,16 @@ public:
 	GLuint combatBackgroundTexture;
 	GLuint backgroundTexture;
 	intp selectedMapTile;
-	std::vector<UIButton*> menuButtons;
-	std::vector<glm::vec2> menuPositions;
-	Creature* combatTooltipTarget;
+	/*std::vector<UIButton*> menuButtons;
+	std::vector<glm::vec2> menuPositions;*/
 	intp displayedBuilding;
 	std::vector<BuildingSlot> buildingSlots;
 	UIClickableContainer* troopSlots;
+	UIClickableContainer* topMenuButtons;
 	// TEMP
 	intp troopSlotsPos;
 	intp troopSlotsDim;
+	Tooltip tooltip;
 
 	// TEMP hero movement (TODO refactor ofc)
 	int heroMoving = -1;
@@ -94,6 +110,7 @@ private:
 	void displayMenuWindow();
 	void displayControlledTroops();
 	void displayCombat();
+	void displayTooltip();
 	void displayBuilding();
 
 	inline bool isMapTileSelected();

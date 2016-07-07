@@ -2,11 +2,13 @@
 #include "GameLogic.h"
 #include "MOCastle.h"
 #include "ViewManager.h"
+#include "DebugParameters.h"
 
 Player::Player(int _factionId) : FactionMember(_factionId) {
 	selectedHero = -1;
 	selectedCastle = intp(-1, -1);
 	memset(minesControlled, 0, sizeof minesControlled);
+	isEliminated = false;
 }
 
 void Player::startTurn() {
@@ -46,7 +48,9 @@ MOHero* Player::setNextHero() {
 
 	selectedHero = (selectedHero + 1) % heroObjects.size();
 
-	ViewManager::instance().mapCameraLookAt(getCurrentHero()->pos);
+	if (debugCameraAutoFocus) {
+		ViewManager::instance().mapCameraLookAt(getCurrentHero()->pos);
+	}
 	pf.findPaths(getCurrentHero()->pos);
 
 	return getCurrentHero();
@@ -59,7 +63,9 @@ MOHero* Player::setPreviousHero() {
 
 	selectedHero = (selectedHero + heroObjects.size() - 1) % heroObjects.size();
 
-	ViewManager::instance().mapCameraLookAt(getCurrentHero()->pos);
+	if (debugCameraAutoFocus) {
+		ViewManager::instance().mapCameraLookAt(getCurrentHero()->pos);
+	}
 	pf.findPaths(getCurrentHero()->pos);
 
 	return getCurrentHero();
@@ -72,7 +78,9 @@ MOHero* Player::setHeroByIndex(int index) {
 
 	selectedHero = index % heroObjects.size();
 
-	ViewManager::instance().mapCameraLookAt(getCurrentHero()->pos);
+	if (debugCameraAutoFocus) {
+		ViewManager::instance().mapCameraLookAt(getCurrentHero()->pos);
+	}
 	pf.findPaths(getCurrentHero()->pos);
 
 	return getCurrentHero();

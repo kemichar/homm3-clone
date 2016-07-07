@@ -3,6 +3,22 @@
 vector<MapBlock*> Resources::blockData;
 map<string, Creature*> Resources::creatureData;
 map<string, GLMmodel*> Resources::modelData;
+map<string, int> Resources::configData;
+
+void Resources::loadConfig() {
+	std::vector<std::string> config = readFile(INPUT_CONFIG);
+
+	for (std::string confLine : config) {
+		std::stringstream ss(confLine);
+		std::string attribute;
+		if (ss >> attribute) {
+			int value;
+			if (ss >> value) {
+				configData[attribute] = value;
+			}
+		}
+	}
+}
 
 void Resources::loadCreatures() {
 	map<string, string> creatureFiles = readListedFiles(INPUT_CREATURE_DIRECTORY, INPUT_CREATURE_LIST);
@@ -10,6 +26,8 @@ void Resources::loadCreatures() {
 		creatureData[it->first] = new Creature(it->first, it->second);
 	}
 }
+
+
 
 void Resources::loadMapBlocks() {
 	vector<string> blocks = readFile(INPUT_MAP_BLOCKS);

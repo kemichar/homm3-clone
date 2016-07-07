@@ -1,13 +1,5 @@
 #pragma once
 
-/*
-struct Input {
-	Input();
-	Input(CamId _cam, intp _pos);
-	CamId cam;
-	intp pos;
-};*/
-
 class InputManager {
 public:
 	void windowResized(int width, int height);

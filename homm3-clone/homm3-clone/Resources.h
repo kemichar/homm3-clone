@@ -13,6 +13,7 @@ using namespace std;
 class Resources {
 
 public:
+	static void loadConfig();
 	static void loadCreatures();
 	static void loadMapBlocks();
 	static void loadModels();
@@ -22,4 +23,5 @@ public:
 	static vector<MapBlock*> blockData;
 	static map<string, Creature*> creatureData;
 	static map<string, GLMmodel*> modelData;
+	static map<string, int> configData;
 };

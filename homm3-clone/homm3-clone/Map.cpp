@@ -255,6 +255,7 @@ void Map::testFillMap(int zones) {
 		}
 	}
 
+
 	// create the main paths between the zone origins (will always stay unblocked)
 	// TODO make them turn and stuff, currently just the shortest path
 	memset(tempFlags, -1, sizeof tempFlags);
@@ -311,7 +312,6 @@ void Map::testFillMap(int zones) {
 	blockGenCount.push_back(25);
 	blockGenOrder.push_back("000");
 	blockGenCount.push_back(30);
-
 
 	int testTries = 50;
 	vector<intp> zoneLocations;

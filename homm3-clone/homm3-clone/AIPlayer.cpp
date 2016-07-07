@@ -3,6 +3,7 @@
 #include "MOMine.h" // TODO refactor
 #include "MOCastle.h"
 #include "FactionSetup.h"
+#include "DebugParameters.h"
 
 AIPlayer::AIPlayer(int _factionId) : Player(_factionId) {
 	// TODO set main goals?
@@ -33,6 +34,10 @@ void AIPlayer::calculateTurn() {
 			visitedBuildings.insert(object->pos); // TEMP the first AI turn will not have the castles "visited" otherwise
 		}
 	}
+	
+	// assumes castles are stored beforehand
+	upgradeCastles();
+	decideNewHeroPurchases();
 	calcCastleTroopAvailability();
 
 	std::cout << "\nAI available castle recruits:" << std::endl;
@@ -40,11 +45,6 @@ void AIPlayer::calculateTurn() {
 		printf("	%d (%d, %d) -> %d power\n", i, castles[i]->pos.x, castles[i]->pos.y, availableTroops[i]);
 	}
 	std::cout << std::endl;
-
-	upgradeCastles();
-
-	// assumes castles are stored beforehand
-	decideNewHeroPurchases();
 
 	std::queue<MOHero*> availableHeroes;
 	for (MOHero* heroObject : heroObjects) {
@@ -133,7 +133,9 @@ void AIPlayer::calculateTurn() {
 
 		// if the hero has a goal -> lets try to work on it
 		if (heroGoals.find(hero->uniqueId) != heroGoals.end()){
-			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			if (debugBotsSlowed) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			}
 			currGoal = heroGoals[hero->uniqueId];
 
 			int moveStatus = moveHero(heroObject, currGoal->target);
@@ -632,7 +634,9 @@ int AIPlayer::moveHero(MOHero* heroObject, intp target) {
 	for (; i < (int)path.size() && heroObject->hero->movementPoints > 0; i++) {
 		heroObject->moveTo(path[i], 1);
 		pf.makeVisibleAround(path[i], 5); // TODO make the scouting radius a hero property (not only here!)
-		std::this_thread::sleep_for(std::chrono::milliseconds(200)); // TEMP AI movement animation
+		if (debugBotsSlowed) {
+			std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		}
 	}
 
 	if (heroObject->hero->movementPoints > 0) {
@@ -646,7 +650,9 @@ int AIPlayer::moveHero(MOHero* heroObject, intp target) {
 		for (int i = 0; i < (int)ghostPath.size() && heroObject->hero->movementPoints > 0; i++) {
 			heroObject->moveTo(ghostPath[i], 1);
 			pf.makeVisibleAround(ghostPath[i], 5); // TODO make the scouting radius a hero property (not only here!)
-			std::this_thread::sleep_for(std::chrono::milliseconds(200)); // TEMP AI movement animation
+			if (debugBotsSlowed) {
+				std::this_thread::sleep_for(std::chrono::milliseconds(200));
+			}
 		}
 	}
 

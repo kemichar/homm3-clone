@@ -1,0 +1,71 @@
+﻿  AIPlayer.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\MapObject.h(4): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  BIT.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\Utility.h(8): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  Buildings.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\Utility.h(8): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  Camera.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\Camera.h(3): fatal error C1083: Cannot open include file: 'glm/glm.hpp': No such file or directory
+  CombatLogic.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\MapObject.h(4): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  Creature.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\Utility.h(8): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  Currency.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\Currency.h(3): fatal error C1083: Cannot open include file: 'glm/glm.hpp': No such file or directory
+  DebugParameters.cpp
+  FactionMember.cpp
+  FactionSetup.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\FactionSetup.h(3): fatal error C1083: Cannot open include file: 'glm/glm.hpp': No such file or directory
+  GameLogic.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\Utility.h(8): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  Hero.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\Constants.h(4): fatal error C1083: Cannot open include file: 'glm/glm.hpp': No such file or directory
+  homm3-clone.cpp
+homm3-clone.cpp(10): fatal error C1083: Cannot open include file: 'glm/glm.hpp': No such file or directory
+  InputManager.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\ViewManager.h(5): fatal error C1083: Cannot open include file: 'glm/glm.hpp': No such file or directory
+  Map.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\Constants.h(4): fatal error C1083: Cannot open include file: 'glm/glm.hpp': No such file or directory
+  MapBlock.cpp
+  MapObject.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\MapObject.h(4): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  MOBuilding.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\MapObject.h(4): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  MOCastle.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\MapObject.h(4): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  MOCreature.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\MapObject.h(4): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  Compiling...
+  Model.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\Model.h(3): fatal error C1083: Cannot open include file: 'glm/glm.hpp': No such file or directory
+  MOEmpty.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\MapObject.h(4): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  MOHero.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\MapObject.h(4): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  MOItem.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\MapObject.h(4): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  MOMine.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\MapObject.h(4): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  MOPath.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\MapObject.h(4): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  MOResource.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\MapObject.h(4): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  MOWall.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\MapObject.h(4): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  Pathfinder.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\Utility.h(8): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  Player.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\MapObject.h(4): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  Resources.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\Utility.h(8): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  stdafx.cpp
+  TopMenu.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\Utility.h(8): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  UIButton.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\UIButton.h(3): fatal error C1083: Cannot open include file: 'glm/glm.hpp': No such file or directory
+  UIClickableContainer.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\Utility.h(8): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  UICreatureContainerDouble.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\Utility.h(8): fatal error C1083: Cannot open include file: 'GL/glut.h': No such file or directory
+  ViewManager.cpp
+c:\users\kemichar\source\repos\homm3-clone\homm3-clone\homm3-clone\ViewManager.h(5): fatal error C1083: Cannot open include file: 'glm/glm.hpp': No such file or directory

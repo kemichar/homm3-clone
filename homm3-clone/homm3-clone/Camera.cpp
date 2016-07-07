@@ -112,8 +112,10 @@ void Camera::addRotation(glm::vec4 rotation) {
 }
 
 void Camera::rotate() {
-	for (glm::vec4 rotation : rotations) {
-		glRotatef(rotation.x, rotation.y, rotation.z, rotation.w);
+	if (glm::length(speed) == 0) {
+		for (glm::vec4 rotation : rotations) {
+			glRotatef(rotation.x, rotation.y, rotation.z, rotation.w);
+		}
 	}
 }
 

@@ -143,11 +143,16 @@ bool Pathfinder::isAccessible(intp location, bool isGhost) {
 	return true;
 }
 
-std::vector<intp> Pathfinder::getReachableTiles(int maxDistance) {
+std::vector<intp> Pathfinder::getReachableTiles(int maxDistance, bool ghost) {
 	std::vector<intp> ret;
 	for (int i = 0; i < map->colCount; i++) {
 		for (int j = 0; j < map->rowCount; j++) {
-			if (distSolid[i][j] >= 0 && distSolid[i][j] <= maxDistance) {
+			if (ghost) {
+				if (distGhost[i][j] >= 0 && distGhost[i][j] <= maxDistance) {
+					ret.push_back(intp(i, j));
+				}
+			}
+			else if (distSolid[i][j] >= 0 && distSolid[i][j] <= maxDistance) {
 				ret.push_back(intp(i, j));
 			}
 		}

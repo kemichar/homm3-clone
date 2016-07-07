@@ -247,4 +247,16 @@ inline std::vector<std::string> splitString(std::string line) {
 	return ret;
 }
 
+inline std::vector<std::string> splitLines(std::string text) {
+	std::vector<std::string> ret;
+
+	std::stringstream buffer(text);
+	std::string line;
+	while (std::getline(buffer, line, '\n')) {
+		ret.push_back(line);
+	}
+
+	return ret;
+}
+
 #endif

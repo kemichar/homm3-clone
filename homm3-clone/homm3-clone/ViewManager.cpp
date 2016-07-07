@@ -4,6 +4,7 @@
 #include "DebugParameters.h"
 #include "MOCastle.h"
 #include "UICreatureContainerDouble.h"
+#include "TopMenu.h"
 
 ViewManager::ViewManager() {
 	memset(isActive, 0, sizeof isActive);
@@ -16,6 +17,7 @@ ViewManager::ViewManager() {
 	promptCamera = Camera(INIT_PROMPT_CAMERA, vec3(0.3, 0.3, 0.3));
 	combatCamera = Camera(INIT_COMBAT_CAMERA, vec3(0, 0, 0));
 	buildingCamera = Camera(INIT_BUILDING_CAMERA, vec3(0, 0, 0));
+	totalCamera = Camera(INIT_TOTAL_CAMERA, vec3(0, 0, 0));
 
 	int unitSlotsPerRow = 3;
 	float offsetX = (INIT_RIGHTPANEL_CAMERA[2] - INIT_RIGHTPANEL_CAMERA[0]) / unitSlotsPerRow;
@@ -38,6 +40,7 @@ ViewManager::ViewManager() {
 	combatUnit = 0.05f;
 	selectedMapTile = intp(-1, -1);
 
+	/*
 	// set up the menu buttons
 	menuPositions.clear();
 	menuButtons.clear();
@@ -47,6 +50,8 @@ ViewManager::ViewManager() {
 	menuButtons.push_back(button2);
 	menuPositions.push_back(vec2(40, 5));
 	menuPositions.push_back(vec2(130, 5));
+	*/
+	topMenuButtons = new TopMenu();
 }
 
 void ViewManager::displayMapWindow() {
@@ -55,6 +60,7 @@ void ViewManager::displayMapWindow() {
 	glPushMatrix();
 
 	GameLogic &gameLogic = GameLogic::instance();
+	Player* currPlayer = gameLogic.getCurrentPlayer();
 
 	// TEMP draw the background
 	if (debugShowBackground) {
@@ -63,6 +69,27 @@ void ViewManager::displayMapWindow() {
 		displayTexture(backgroundTexture, mapUnit * gameLogic.colCount, mapUnit * gameLogic.rowCount, vec3(0.75, 0.75, 0.75));
 		glPopMatrix();
 	}
+	else {
+		glDisable(GL_LIGHTING);
+		glColor3f(1, 1, 1);
+		glRectf(0, 0, mapUnit * gameLogic.colCount, mapUnit * gameLogic.rowCount);
+		glEnable(GL_LIGHTING);
+	}
+
+	glDisable(GL_LIGHTING);
+	if (currPlayer->getCurrentHero() != nullptr && debugDistanceDisplay > 0) {
+		std::vector<intp> reachable =
+			currPlayer->pf.getReachableTiles(
+				currPlayer->getCurrentHero()->hero->movementPoints,
+				debugDistanceDisplay == 2
+			);
+		for (intp reachablePos : reachable) {
+			glColor3f(0.5, 0.5, 1);
+			glRectf(reachablePos.x * mapUnit, reachablePos.y * mapUnit,
+				(reachablePos.x + 1) * mapUnit, (reachablePos.y + 1) * mapUnit);
+		}
+	}
+	glEnable(GL_LIGHTING);
 
 	// color the currently selected tile and the path to that tile (if one exists)
 	glDisable(GL_LIGHTING);
@@ -330,15 +357,21 @@ void ViewManager::displayMinimap() {
 void ViewManager::displayMenuWindow() {
 	topMenuCamera.activateView(Camera::ORTHO2D);
 
-	for (int i = 0; i < (int)menuPositions.size(); i++) {
+	topMenuButtons->draw(
+		intp(0, 0),
+		intp(topMenuCamera.getViewport()[2], topMenuCamera.getViewport()[3])
+	);
+
+	/*for (int i = 0; i < (int)menuPositions.size(); i++) {
 		glPushMatrix();
 		glColor3f(0.8, 0.8, 0.8);
 		glTranslatef(menuPositions[i].x, menuPositions[i].y, 0);
 		menuButtons[i]->draw();
 		glPopMatrix();
-	}
+	}*/
 
 	// TODO make ui text classes etc.
+
 	glPushMatrix();
 	Currency curr = GameLogic::instance().getCurrentPlayer()->wallet;
 	std::string resourceText =
@@ -499,33 +532,53 @@ void ViewManager::displayCombat() {
 			drawText(GLUT_BITMAP_HELVETICA_12, std::to_string(creature->count));
 		}
 	}
+}
 
-	// display the creature tooltip if visible (if hovering over a creature)
-	// TODO modify to adjust to font size, currently always using helvetica 12
-	if (combatTooltipTarget != nullptr) {
-		vec3 worldPoint = vec3 (combatTooltipTarget->combatPos.x * combatUnit + combatUnit / 2,
-			combatTooltipTarget->combatPos.y * combatUnit + combatUnit / 2, 0);
-		vec2 screenPos = combatCamera.worldToViewPoint(worldPoint, Camera::NORMAL);
+void ViewManager::update(int elapsedTime) {
+	if (tooltip.duration > 0) {
+		tooltip.duration -= elapsedTime;
+	}
+}
 
-		// move the tooltip if needed so it doesn't display outside the view
-		std::vector<std::string> description = combatTooltipTarget->getDescription();
-		if (screenPos.x >= combatCamera.getViewport()[2] / 2.f) {
-			screenPos.x -= 100;
-		}
-		if (screenPos.y >= combatCamera.getViewport()[3] / 2.f) {
-			screenPos.y -= description.size() * 15 + 30;
-		}
-		glColor3f(0.4f, 0.4f, 0.4f);
-		glRectf(screenPos.x, screenPos.y, screenPos.x + 100, screenPos.y + description.size() * 15 + 30);
-		glColor3f(0.7f, 0.7f, 0.7f);
-		glRectf(screenPos.x + 5, screenPos.y + 5, screenPos.x + 95, screenPos.y + description.size() * 15 + 25);
-		glColor3f(0, 0, 0);
-		for (std::string descLine : combatTooltipTarget->getDescription()) {
-			glRasterPos2d(screenPos.x + 15, screenPos.y + description.size() * 15);
-			drawText(GLUT_BITMAP_HELVETICA_12, descLine);
-			screenPos.y -= 15;
+void ViewManager::displayTooltip() {
+	tooltip.refCamera->activateView(Camera::ORTHO2D, false);
+
+	glColor3f(0.4f, 0.4f, 0.4f);
+	glRectf(tooltip.pos.x, tooltip.pos.y, tooltip.pos.x + tooltip.dim.x, tooltip.pos.y + tooltip.dim.y);
+	glColor3f(0.7f, 0.7f, 0.7f);
+	glRectf(tooltip.pos.x + 5, tooltip.pos.y + 5, tooltip.pos.x + tooltip.dim.x - 5, tooltip.pos.y + tooltip.dim.y - 5);
+	glColor3f(0, 0, 0);
+	int ypos = tooltip.pos.y - 30;
+	for (std::string descLine : tooltip.description) {
+		glRasterPos2d(tooltip.pos.x + 15, ypos + tooltip.dim.y);
+		drawText(GLUT_BITMAP_HELVETICA_12, descLine);
+		ypos -= 15;
+		if (ypos <= 0) {
+			break;
 		}
 	}
+}
+
+void ViewManager::showTooltip(intp pos, std::vector<std::string> description, Camera* refCamera, int milliseconds) {
+	// calculate the required tooltip dimensions depending on the longest description line and number of lines
+	tooltip.dim.x = 0;
+	for (std::string descLine : description) {
+		tooltip.dim.x = mmax(tooltip.dim.x, descLine.size() * 8);
+	}
+	tooltip.dim.y = description.size() * 15 + 30;
+
+	// move the tooltip if needed so it doesn't display outside the viewport
+	if (pos.x >= refCamera->getViewport()[2] / 2.f) {
+		pos.x -= tooltip.dim.x;
+	}
+	if (pos.y >= refCamera->getViewport()[3] / 2.f) {
+		pos.y -= tooltip.dim.y;
+	}
+	tooltip.pos = pos;
+
+	tooltip.description = description;
+	tooltip.refCamera = refCamera;
+	tooltip.duration = milliseconds;
 }
 
 void ViewManager::displayBuilding() {
@@ -620,6 +673,9 @@ void ViewManager::displayActiveWindows() {
 	displayControlledTroops();
 	displayCombat();
 	displayBuilding();
+	if (tooltip.duration > 0) {
+		displayTooltip();
+	}
 }
 
 void ViewManager::displayTexture(GLuint id, float width, float height, vec3 colorMult) {
@@ -651,7 +707,13 @@ void ViewManager::showBuilding(intp location) {
 	}
 	if (object->objectType == MOType::CASTLE) {
 		delete troopSlots;
-		troopSlots = new UICreatureContainerDouble(object->hero, GameLogic::instance().getHeroAt(location)->hero);
+		MOHero* visitingHero = GameLogic::instance().getHeroAt(location);
+		if (visitingHero != nullptr) {
+			troopSlots = new UICreatureContainerDouble(object->hero, GameLogic::instance().getHeroAt(location)->hero);
+		}
+		else {
+			troopSlots = new UICreatureContainerDouble(object->hero, nullptr);
+		}
 	}
 	isActive[CamId::BUILDING] = true;
 }
@@ -664,4 +726,9 @@ ViewManager& ViewManager::instance() {
 
 BuildingSlot::BuildingSlot(glm::vec2 _pos, glm::vec2 _dim, int _type)
 	: pos(_pos), dim(_dim), type(_type){
+}
+
+Tooltip::Tooltip() : duration(0){
+	description.clear();
+	refCamera = nullptr;
 }

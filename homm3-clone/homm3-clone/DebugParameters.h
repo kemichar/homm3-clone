@@ -10,5 +10,8 @@ extern bool debugShowBackground;
 extern bool debugShowFogOfWar;
 extern int debugWhoseFogToShow;
 extern bool debugTiltedMap;
+extern bool debugCameraAutoFocus;
+extern bool debugBotsSlowed;
+extern int debugDistanceDisplay;
 
 #endif

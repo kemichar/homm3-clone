@@ -96,7 +96,6 @@ void InputManager::processHover(int x, int y) {
 				vec2(int(tempSelected.x / viewManager.combatUnit),
 					int(tempSelected.y / viewManager.combatUnit));
 
-			viewManager.combatTooltipTarget = nullptr;
 			if (tempSelected.x < 0 || tempSelected.y < 0 ||
 				tempSelected.x > COMBAT_COLS * viewManager.combatUnit ||
 				tempSelected.y > COMBAT_ROWS * viewManager.combatUnit) {
@@ -106,11 +105,32 @@ void InputManager::processHover(int x, int y) {
 			CombatLogic &combatLogic = CombatLogic::instance();
 			for (Creature* creature : combatLogic.creatures) {
 				if (creature->combatPos == tempTile) {
-					viewManager.combatTooltipTarget = creature;
+					vec3 worldPoint = vec3(
+						tempTile.x * viewManager.combatUnit + viewManager.combatUnit / 2,
+						tempTile.y * viewManager.combatUnit + viewManager.combatUnit / 2,
+						0
+					);
+
+					viewManager.showTooltip(
+						viewManager.combatCamera.worldToViewPoint(worldPoint, Camera::NORMAL),
+						creature->getDescription(),
+						&viewManager.combatCamera
+					);
 					break;
 				}
 			}
 		}
+	}
+	else if (rectContains(vec2(viewManager.INIT_TOPMENU_CAMERA[0], viewManager.INIT_TOPMENU_CAMERA[1]),
+		vec2(viewManager.INIT_TOPMENU_CAMERA[2] - viewManager.INIT_TOPMENU_CAMERA[0], viewManager.INIT_TOPMENU_CAMERA[3] - viewManager.INIT_TOPMENU_CAMERA[1]),
+		vec2((float)screenX / windowWidth, (float)screenY / windowHeight))) {
+
+		viewManager.topMenuButtons->processHover(
+			(screenX - viewManager.topMenuCamera.getViewport()[0])
+				/ (float)viewManager.topMenuCamera.getViewport()[2],
+			(screenY - viewManager.topMenuCamera.getViewport()[1])
+				/ (float)viewManager.topMenuCamera.getViewport()[3]
+		);
 	}
 }
 
@@ -202,6 +222,21 @@ void InputManager::processKeyUp(unsigned char key, int x, int y) {
 	else if (key == 'c') {
 		viewManager.showBuilding(gameLogic.getCurrentPlayer()->getSelectedCastle());
 	}
+	else if (key == '+') {
+		if (!gameLogic.isAiActive()) {
+			MOHero* heroObject = gameLogic.getCurrentPlayer()->getCurrentHero();
+			if (heroObject != nullptr) {
+				heroObject->hero->movementPoints += 5;
+				gameLogic.getCurrentPlayer()->pf.findPaths(heroObject->pos);
+				viewManager.selectedMapTile = intp(-1, -1);
+			}
+		}
+	}
+	else if (key == '\'') {
+		if (!gameLogic.isAiActive()) {
+			gameLogic.getCurrentPlayer()->wallet[GOLD] += 500;
+		}
+	}
 }
 
 void InputManager::processKeySpecial(int key, int x, int y) {
@@ -214,6 +249,7 @@ void InputManager::processKeySpecial(int key, int x, int y) {
 	else if (key == GLUT_KEY_UP) {
 	}
 	else if (key == GLUT_KEY_F1) {
+		debugBotsSlowed = !debugBotsSlowed;
 		//paused = !paused;
 	}
 	else if (key == GLUT_KEY_F2) {
@@ -223,7 +259,7 @@ void InputManager::processKeySpecial(int key, int x, int y) {
 		gameLogic.map->testFillMap(5);
 	}
 	else if (key == GLUT_KEY_F3) {
-		debugFreeCamera = !debugFreeCamera;
+		debugCameraAutoFocus = !debugCameraAutoFocus;
 	}
 	else if (key == GLUT_KEY_F4) {
 		debugShowCoordinates = !debugShowCoordinates;
@@ -242,6 +278,12 @@ void InputManager::processKeySpecial(int key, int x, int y) {
 		if (debugWhoseFogToShow == GameLogic::instance().players.size()) {
 			debugWhoseFogToShow = -1; // will show the current player's fog
 		}
+	}
+	else if (key == GLUT_KEY_F9) {
+		debugDistanceDisplay = (debugDistanceDisplay + 1) % 3;
+	}
+	else if (key == GLUT_KEY_F10) {
+		debugFreeCamera = !debugFreeCamera;
 	}
 }
 
@@ -319,12 +361,17 @@ void InputManager::processTopMenuClick(int button, int state, int x, int y) {
 	ViewManager &viewManager = ViewManager::instance();
 
 	if (button == GLUT_LEFT_BUTTON && state == GLUT_UP) {
+		viewManager.topMenuButtons->processClick(
+			x / (float)(viewManager.topMenuCamera.getViewport()[2]),
+			y / (float)(viewManager.topMenuCamera.getViewport()[3])
+		);
+		/*
 		for (int i = 0; i < (int)viewManager.menuButtons.size(); i++) {
 			if (rectContains(viewManager.menuPositions[i], viewManager.menuButtons[i]->getDimension(), vec2(x, y))) {
 				viewManager.menuButtons[i]->activate();
 				break;
 			}
-		}
+		}*/
 	}
 }
 

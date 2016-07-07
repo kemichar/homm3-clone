@@ -30,7 +30,7 @@ public:
 
 	bool isAccessible(intp location, bool isGhost = false);
 
-	std::vector<intp> getReachableTiles(int maxDistance = oo);
+	std::vector<intp> getReachableTiles(int maxDistance = oo, bool ghost = false);
 	int countInvisibleAround(intp tile, int radius = 5);
 
 	bool tileVisible[MAP_MAX_COLS][MAP_MAX_ROWS];

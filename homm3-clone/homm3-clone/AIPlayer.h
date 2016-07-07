@@ -11,7 +11,7 @@
 	GHOSTMOVE - similar to MOVE, but we're using the Pathfinder ghost path 
 	and consequentially attacking everything on the way
 	PICK_UP - move to the targetted item and pick it up
-	VISIT - move to the targetted building and interact with it
+	VISIT - move to the targeted building and interact with it
 	FIGHT - fight with all threats found at the target location
 	GATHER_ARMY - pick up the reserved troops from the target location (e.g. castle)
 */

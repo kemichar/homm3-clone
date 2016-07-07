@@ -17,6 +17,7 @@ const std::string INPUT_CREATURE_LIST = "creature_list.txt";
 const std::string INPUT_MAP_BLOCKS = "MapGenerator/blocks.txt";
 const std::string INPUT_MODEL_DIRECTORY = "Models/";
 const std::string INPUT_MODEL_LIST = "model_list.txt";
+const std::string INPUT_CONFIG = "config.txt";
 
 // application
 
@@ -150,5 +151,21 @@ const int CREATURE_SPAWN_MAX[7] = {
 
 const float AI_AGGRESSION_FACTOR = 1.5f; // [0, 1] aggressive, <1, ...> defensive
 const float AI_COMBAT_OPTIMISM = 0.2f; // the portion of his army the AI expects to keep in a winnable fight
+
+// tooltips
+const std::string DEV_HOTKEYS_TOOLTIP =
+	"F1 - toggle fast AI turns\n"
+	"F2 - remake map\n"
+	"F3 - toggle autofocus\n"
+	"F4 - toggle coordinates\n"
+	"F5 - toggle grid\n"
+	"F6 - toggle background\n"
+	"F7 - toggle fog\n"
+	"F8 - scroll fog owner\n"
+	"F9 - toggle distance display\n"
+	"F10 - toggle camera bounds\n"
+	"x - tilt the view\n"
+	"+ - add movement points"
+;
 
 #endif

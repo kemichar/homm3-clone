@@ -28,6 +28,7 @@ public:
 	int currentPlayer;
 	int turnCount;
 	int dayCount;
+	int playersEliminated;
 
 	Map* map;
 	int rowCount;
