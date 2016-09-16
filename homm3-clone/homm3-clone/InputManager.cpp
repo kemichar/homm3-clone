@@ -103,6 +103,7 @@ void InputManager::processHover(int x, int y) {
 			}
 
 			CombatLogic &combatLogic = CombatLogic::instance();
+			bool hoveredCreature = false;
 			for (Creature* creature : combatLogic.creatures) {
 				if (creature->combatPos == tempTile) {
 					vec3 worldPoint = vec3(
@@ -114,10 +115,15 @@ void InputManager::processHover(int x, int y) {
 					viewManager.showTooltip(
 						viewManager.combatCamera.worldToViewPoint(worldPoint, Camera::NORMAL),
 						creature->getDescription(),
-						&viewManager.combatCamera
+						&viewManager.combatCamera,
+						1000
 					);
+					hoveredCreature = true;
 					break;
 				}
+			}
+			if (!hoveredCreature && (viewManager.tooltip.refCamera == &viewManager.combatCamera)) {
+				viewManager.tooltip.duration = 0;
 			}
 		}
 	}
@@ -232,7 +238,7 @@ void InputManager::processKeyUp(unsigned char key, int x, int y) {
 			}
 		}
 	}
-	else if (key == '\'') {
+	else if (key == '0') {
 		if (!gameLogic.isAiActive()) {
 			gameLogic.getCurrentPlayer()->wallet[GOLD] += 500;
 		}
@@ -284,6 +290,8 @@ void InputManager::processKeySpecial(int key, int x, int y) {
 	}
 	else if (key == GLUT_KEY_F10) {
 		debugFreeCamera = !debugFreeCamera;
+	}
+	else if (key == GLUT_KEY_F11) {
 	}
 }
 

@@ -134,7 +134,12 @@ Buildings::BuyStatus Buildings::Dwelling::purchase(int amount, Player * player, 
 
 	available -= amount;
 	player->wallet[GOLD] -= amount * creature.hero->creatures[0]->cost;
-	hero->creatures[freeSlot] = new Creature(creature.hero->creatures[0], amount, player->getFactionId());
+	if (hero->creatures[freeSlot] == nullptr) {
+		hero->creatures[freeSlot] = new Creature(creature.hero->creatures[0], amount, player->getFactionId());
+	}
+	else {
+		hero->creatures[freeSlot]->count += amount;
+	}
 
 	return OK;
 }

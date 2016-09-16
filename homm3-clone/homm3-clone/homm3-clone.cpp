@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <vector>
 #include <cmath>
+// TODO clean up and remove
 #include <glm/glm.hpp>
 #include <queue>
 #include <stack>
@@ -35,91 +36,14 @@
 int windowWidth = INITIAL_WIDTH;
 int windowHeight = INITIAL_HEIGHT;
 
-int frameCount;
-int curr, last;
-bool paused;
-
 GameLogic& gameLogic = GameLogic::instance();
 FactionSetup& factionSetup = FactionSetup::instance();
 CombatLogic& combatLogic = CombatLogic::instance();
 ViewManager& viewManager = ViewManager::instance();
 InputManager& inputManager = InputManager::instance();
 
-void myDisplay() {
-	glClear(GL_DEPTH_BUFFER_BIT);
-
-	viewManager.displayActiveWindows();
-
-	glutSwapBuffers();
-}
-
-double ZOOM_MIN = 1;
-double ZOOM_MAX = 20;
-void myIdle() {
-	curr = glutGet(GLUT_ELAPSED_TIME);
-	int elapsed = curr - last;
-
-	if (elapsed > 10) {
-		last = curr;
-
-		if (paused)
-			return;
-
-		// archive dead heroes
-		if (!gameLogic.isAiActive()) {
-			for (Player* player : gameLogic.players) {
-				for (int i = 0; i < (int)player->heroObjects.size(); ) {
-					if (player->heroObjects[i]->hero->isDead) {
-						player->archiveHero(i);
-					}
-					else {
-						i++;
-					}
-				}
-			}
-		}
-
-		// update the camera location
-		double m = sqrt(
-			viewManager.mapCamera.speed.x * viewManager.mapCamera.speed.x +
-			viewManager.mapCamera.speed.y * viewManager.mapCamera.speed.y);
-		if (m > eps) {
-			glm::vec3 pointSW = viewManager.mapCamera.viewToWorldPoint(windowWidth * viewManager.INIT_MAP_CAMERA[0], windowHeight * viewManager.INIT_MAP_CAMERA[1]);
-			glm::vec3 pointNE = viewManager.mapCamera.viewToWorldPoint(windowWidth * viewManager.INIT_MAP_CAMERA[2], windowHeight * viewManager.INIT_MAP_CAMERA[3]);
-
-			double newX = viewManager.mapCamera.pos.x + viewManager.mapCamera.speed.x * elapsed * 0.004 / m;
-			double newY = viewManager.mapCamera.pos.y + viewManager.mapCamera.speed.y * elapsed * 0.004 / m;
-			if ((debugFreeCamera) ||
-				(newX < viewManager.mapCamera.pos.x && pointSW.x + viewManager.mapUnit >= 0) ||
-				(newX > viewManager.mapCamera.pos.x && pointNE.x - viewManager.mapUnit <= gameLogic.colCount * viewManager.mapUnit)) {
-				viewManager.mapCamera.pos.x = newX;
-			}
-			if ((debugFreeCamera) ||
-				(newY < viewManager.mapCamera.pos.y && pointSW.y + viewManager.mapUnit >= 0) ||
-				(newY > viewManager.mapCamera.pos.y && pointNE.y - viewManager.mapUnit <= gameLogic.rowCount * viewManager.mapUnit)) {
-				viewManager.mapCamera.pos.y = newY;
-			}
-		}
-		viewManager.mapCamera.pos.z += viewManager.mapCamera.speed.z * elapsed * 0.004;
-		if (!debugFreeCamera) {
-			viewManager.mapCamera.pos.z =
-				clamp(ZOOM_MIN, ZOOM_MAX, viewManager.mapCamera.pos.z);
-		}
-
-		// update the hero movement animation
-		if (~viewManager.heroMoving) {
-			viewManager.movingProgress += viewManager.movingSpeed * elapsed;
-		}
-
-		viewManager.update(elapsed);
-
-		// display the scene
-		myDisplay();
-
-		frameCount++;
-	}
-}
-
+void myDisplay();
+void myIdle();
 void myReshape(int width, int height);
 void myPassiveMouseMovement(int x, int y);
 void myActiveMouseMovement(int x, int y);
@@ -128,6 +52,15 @@ void mySpecial(int key, int x, int y);
 void myKeyboard(unsigned char key, int x, int y);
 void myKeyboardUp(unsigned char key, int x, int y);
 void loadTexture(string texturePath, GLuint &saveId);
+
+/*
+	Performs the initial application setup:
+		- glut callback registration
+		- resource loading
+	Using the configuration file parameters creates the corresponding
+	GameLogic elements (players, factions, calls map generation).
+	Finally creates the AI thread and starts the game.
+*/
 
 int main(int argc, char ** argv) {
 	Resources::loadConfig();
@@ -217,6 +150,86 @@ int main(int argc, char ** argv) {
 	return 0;
 }
 
+void myDisplay() {
+	glClear(GL_DEPTH_BUFFER_BIT);
+
+	viewManager.displayActiveWindows();
+
+	glutSwapBuffers();
+}
+
+int frameCount;
+int curr, last;
+bool paused;
+double ZOOM_MIN = 1;
+double ZOOM_MAX = 20;
+// TODO move some (all) of this to GameLogic / ViewManager
+void myIdle() {
+	curr = glutGet(GLUT_ELAPSED_TIME);
+	int elapsed = curr - last;
+
+	if (elapsed > 10) {
+		last = curr;
+
+		if (paused)
+			return;
+
+		// archive dead heroes
+		if (!gameLogic.isAiActive()) {
+			for (Player* player : gameLogic.players) {
+				for (int i = 0; i < (int)player->heroObjects.size(); ) {
+					if (player->heroObjects[i]->hero->isDead) {
+						player->archiveHero(i);
+					}
+					else {
+						i++;
+					}
+				}
+			}
+		}
+
+		// update the camera location
+		double m = sqrt(
+			viewManager.mapCamera.speed.x * viewManager.mapCamera.speed.x +
+			viewManager.mapCamera.speed.y * viewManager.mapCamera.speed.y);
+		if (m > eps) {
+			glm::vec3 pointSW = viewManager.mapCamera.viewToWorldPoint(windowWidth * viewManager.INIT_MAP_CAMERA[0], windowHeight * viewManager.INIT_MAP_CAMERA[1]);
+			glm::vec3 pointNE = viewManager.mapCamera.viewToWorldPoint(windowWidth * viewManager.INIT_MAP_CAMERA[2], windowHeight * viewManager.INIT_MAP_CAMERA[3]);
+
+			double newX = viewManager.mapCamera.pos.x + viewManager.mapCamera.speed.x * elapsed * 0.004 / m;
+			double newY = viewManager.mapCamera.pos.y + viewManager.mapCamera.speed.y * elapsed * 0.004 / m;
+			if ((debugFreeCamera) ||
+				(newX < viewManager.mapCamera.pos.x && pointSW.x + viewManager.mapUnit >= 0) ||
+				(newX > viewManager.mapCamera.pos.x && pointNE.x - viewManager.mapUnit <= gameLogic.colCount * viewManager.mapUnit)) {
+				viewManager.mapCamera.pos.x = newX;
+			}
+			if ((debugFreeCamera) ||
+				(newY < viewManager.mapCamera.pos.y && pointSW.y + viewManager.mapUnit >= 0) ||
+				(newY > viewManager.mapCamera.pos.y && pointNE.y - viewManager.mapUnit <= gameLogic.rowCount * viewManager.mapUnit)) {
+				viewManager.mapCamera.pos.y = newY;
+			}
+		}
+		viewManager.mapCamera.pos.z += viewManager.mapCamera.speed.z * elapsed * 0.004;
+		if (!debugFreeCamera) {
+			viewManager.mapCamera.pos.z =
+				clamp(ZOOM_MIN, ZOOM_MAX, viewManager.mapCamera.pos.z);
+		}
+
+		// update the hero movement animation
+		if (~viewManager.heroMoving) {
+			viewManager.movingProgress += viewManager.movingSpeed * elapsed;
+		}
+
+		viewManager.update(elapsed);
+
+		// display the scene
+		myDisplay();
+
+		frameCount++;
+	}
+}
+
+// TODO move some of this to ViewManager
 void myReshape(int width, int height) {
 	windowWidth = width;
 	windowHeight = height;

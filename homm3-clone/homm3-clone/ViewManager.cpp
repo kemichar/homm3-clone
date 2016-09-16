@@ -231,10 +231,10 @@ void ViewManager::displayMapWindow() {
 					// TODO refactor animation
 					heroMoving = -1;
 					selectedMapTile = intp(-1, -1);
-					player->pf.findPaths(player->getCurrentHero()->pos);
 
 					// TODO add tile activation stuff
 					gameLogic.interact(heroObject);
+					player->pf.findPaths(player->getCurrentHero()->pos);
 				}
 			}
 
